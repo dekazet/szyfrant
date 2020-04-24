@@ -1,2 +1,0 @@
-# szyfrant
-Wasabi?
