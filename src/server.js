@@ -49,7 +49,7 @@ game_state = {
 
 io.on('connection', (socket) => {
     log('Client ' + socket.id +  ' connected from ' + socket.request.connection.remoteAddress);
-    socket.on('join', () => {log('Client joins a team')});
+    socket.on('game-state', () => { log('Client request a game state'); socket.emit('game-state', {game_state : game_state});});
     socket.on('disconnect', () => {log('Client disconnected')});
 });
 

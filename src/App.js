@@ -47,33 +47,63 @@ class CodeEntryForm extends React.Component {
 
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      connected : false,
+      socket : null,
+      game_status : null
+    }
 
-  componentDidMount = () => {
+    this.getGameState = this.getGameState.bind(this); 
   }
 
-  joinGame() {
-    const socket = io('http://localhost:3000', {
-      reconnectionDelay: 1000,
-      reconnection: true,
-      reconnectionAttemps: 10,
-      transports: ['websocket'],
-      agent: false,
-      upgrade: false,
-      rejectUnauthorized: false
-    });  
-  socket.emit('join');
-  console.log('Socket: ' + socket.id);
-}
+  componentDidMount = () => {
+      const socket = io('http://localhost:3000', {
+        forceNew : true,
+        reconnectionDelay: 1000,
+        reconnection: true,
+        reconnectionAttemps: 10,
+        transports: ['websocket'],
+        agent: false,
+        upgrade: false,
+        rejectUnauthorized: false
+      });
+    
+    socket.on('connect', () => {
+      console.log('Connected to the server');
+      this.setState({connected : true});
+    })
 
+    socket.on('game-state', (game_state) => { 
+      console.log('Received game state');
+      this.setState({game_state : game_state}); 
+    });
+
+    console.log('Created socket');
+    this.setState({socket : socket});
+  }
+
+  getGameState() {
+    console.log('Requesting game state');
+    this.state.socket.emit('game-state');
+  }
 
 //        <div className="sampleEntry">
 //         <CodeEntryForm />
 //      </div>
 
   render() {
+    console.log('Rendering app');
+    let status = 'connected';
+    if (!this.state.connected) {
+      status = 'connecting'
+    }
+
     return (
       <div>
-        <button onClick={this.joinGame}>Join game</button>
+        <div>Connection status - {status}</div>
+        <button onClick={this.getGameState}>Get game state</button>
       </div>
     );
   }
