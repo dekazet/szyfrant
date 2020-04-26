@@ -3,6 +3,36 @@ import './App.css';
 import io from 'socket.io-client'
 var szyfrant = require('./szyfrant');
 
+var gameSample = 
+{
+  state: 2,
+  round: 
+  {
+    state: 11,
+    teams: [
+      {
+        drawn_number: 411,
+        encoded_number: '',
+        decoded_number: 0,
+        oponnents_number: 0
+      },
+      {
+        drawn_number: 234,
+        encoded_number: '',
+        decoded_number: 0,
+        oponnents_number: 0
+      }
+    ]
+  },
+  words: [
+    [ 'ZMYWACZ', 'RĘKAWICA', 'SIŁA', 'MIEDŹ' ],
+    [ 'FENIKS', 'ZWOJE', 'OLIMP', 'TANIEC' ]
+  ],
+  tokens: [ [ 0, 0 ], [ 0, 0 ] ],
+  round_number: 0,
+  past_rounds: []
+}
+
 function timeStamp() {
   var now = new Date();
   var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
@@ -22,19 +52,101 @@ function log(str) {
   console.log(timeStamp() + ' ' + str);
 }
 
-class EntryForm extends React.Component {
+class RoundCard extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return(
+    <div class="game-card">
+      <div class="game-card-header">
+        <div class='game-card-round'>Round {this.props.roundNumber}</div>
+        <div class='game-card-guess'>?</div>
+        <div class='game-card-number'>$</div>   
+      </div>
+      <div class="game-card-row">
+      <div class='game-card-word'>Kaszanka</div>
+        <div class='game-card-guess'>3</div>
+        <div class='game-card-number'>4</div>   
+      </div>
+      <div class="game-card-row">
+      <div class='game-card-word'>Zajac</div>
+        <div class='game-card-guess'>6</div>
+        <div class='game-card-number'>7</div>   
+      </div>
+      <div class="game-card-row">
+      <div class='game-card-word'>Jaja</div>
+        <div class='game-card-guess'>6</div>
+        <div class='game-card-number'>5</div>   
+      </div>
+    </div>)
+  }
+}
+
+
+class GameBoardKyes extends React.Component {
+  constructor(props) {
+    super(props)
+  }  
+
+  render() {
+    const generateHints = this.props.hints.map((hint) => {
+      return (<div class="game-board-keys-hint">{hint}</div>);
+    });
+
+    return (
+    <div class="game-board-keys">
+      <div class="game-board-keys-header">{this.props.name}</div>
+      {generateHints}
+    </div>);
+  }
+}
+
+class GameBoard extends React.Component {
+  constructor(props) {
+    super(props)
+  }  
+
+  render() {
+    return (
+    <div class="game-board-with-keys">
+      <div class="game-board">
+        <RoundCard roundNumber="1"/>
+        <RoundCard roundNumber="2"/>
+        <RoundCard roundNumber="3"/>
+        <RoundCard roundNumber="4"/>
+        <RoundCard roundNumber="5"/>
+        <RoundCard roundNumber="6"/>
+        <RoundCard roundNumber="7"/>
+        <RoundCard roundNumber="8"/>
+      </div>
+      <div class="game-board-hints-row">
+        <GameBoardKyes name="#1" hints={["krowa", "jadzia", "maslak"]}/>
+        <GameBoardKyes name="#2" hints={["krowa", "jadzia", "maslak"]}/>
+        <GameBoardKyes name="#3" hints={["madzia", "jadzia", "maslak"]}/>
+        <GameBoardKyes name="#4" hints={["jadzia", "maslak"]}/>
+      </div>
+    </div>
+    );
+  }
+}
+
+class EncodingForm extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {codes: ''};
+    this.state = {codes: ['', '', '']};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
 
-  handleChange(event) {
-    this.setState({codes : event.target.value})
+  handleChange(index, event) {
+    let codes = this.state.codes.slice();
+    codes[index] = event.target.value;
+    this.setState({codes : codes})
   }
 
 
@@ -46,12 +158,18 @@ class EntryForm extends React.Component {
   render() {
     return(
       <form onSubmit={this.handleSubmit}>
-        <input type="text" value={this.state.codes} onChange={(event) => {this.handleChange(event)}} />
-        <input type="submit" value="Nadaj kod" />
+        <input type="text" value={this.state.codes[0]} onChange={(event) => {this.handleChange(0, event)}} />
+        <input type="text" value={this.state.codes[1]} onChange={(event) => {this.handleChange(1, event)}} />
+        <input type="text" value={this.state.codes[2]} onChange={(event) => {this.handleChange(2, event)}} />
+        <input type="submit" value="Wyslij wiadomosc" />
        </form>
     );
   }
 }
+
+const TEAM_NONE = -1;
+const TEAM_A = 0;
+const TEAM_B = 1;
 
 
 class App extends Component {
@@ -60,13 +178,14 @@ class App extends Component {
     this.state = {
       connected : false,
       socket : null,
-      game_state : null,
-      team : 0
+      game_state : null
     }
 
     this.refreshGameState = this.refreshGameState.bind(this); 
     this.newGame = this.newGame.bind(this); 
     this.startRound = this.startRound.bind(this); 
+    this.joinTeamA = this.joinTeamA.bind(this); 
+    this.joinTeamB = this.joinTeamB.bind(this); 
   }
 
   componentDidMount = () => {
@@ -89,6 +208,7 @@ class App extends Component {
     socket.on('connect', () => {
       log('Connected to the server');
       this.setState({connected : true});
+      this.state.socket.emit('game-state');
     })
 
     socket.on('game-state', (game_state) => { 
@@ -101,26 +221,34 @@ class App extends Component {
   }
 
     refreshGameState() {
-      log('Requesting game state');
       this.state.socket.emit('game-state');
     }
 
     newGame() {
-      log('Requesting new game');
       this.state.socket.emit('game-new');     
     }
 
     startRound() {
-      log('Requesting round start');
       this.state.socket.emit('game-start-round');     
     }
 
+    joinTeamA() {
+      this.state.socket.emit('game-join-a');     
+    }
+
+    joinTeamB() {
+      this.state.socket.emit('game-join-b');     
+    }
 //        <div className="sampleEntry">
 //         <CodeEntryForm />
 //      </div>
 
   render() {
     log('Rendering app');
+
+    return (
+      <div class="game-main"><GameBoard /></div>
+    );
     
     if (!this.state.connected) {
       return(<div>Connecting...</div>);
@@ -130,23 +258,28 @@ class App extends Component {
       return(<div>Refreshing game state...</div>);
     }
 
-    const words1 = this.state.game_state.words[0].map((word) => {
+    if (this.state.game_state.team == TEAM_NONE) {
+      return(
+        <div>
+          <button onClick={this.joinTeamA}>Join team A</button>
+          <button onClick={this.joinTeamB}>Join team B</button>
+        </div>
+      );
+    }
+
+    const words = this.state.game_state.words[this.state.game_state.team].map((word) => {
         return (<li>{word}</li>);
     }
     );
 
-    const words2 = this.state.game_state.words[1].map((word) => {
-      return (<li>{word}</li>);
-    }
-    );
-
-
+    const showEncodingForm = true;
+    
     return (
       <div>
         <button onClick={this.newGame}>Start new game</button>
         <button onClick={this.refreshGameState}>Refresh game state</button>
-        <div><ol>{words1}</ol></div>
-        <div><ol>{words2}</ol></div>
+        <div><ol>{words}</ol></div>
+        <div> {showEncodingForm ? <EncodingForm /> : null }</div>
         <button onClick={this.startRound}>Start the round</button>
       </div>
     );

@@ -27,15 +27,62 @@ function log(str) {
   console.log(timeStamp() + ' ' + str);
 }
 
-game_state = szyfrant.newGame();
+state = szyfrant.newGame();
+team_a = new Set();
+team_b = new Set();
+
+function teamFromClient(id) {
+  if (team_a.has(id)) {
+    return 0;
+  }
+  if (team_b.has(id)) {
+    return 1;
+  }
+  return -1;
+}
+
+function sendState(socket) {
+  let game_state = Object.assign({}, state, {team : teamFromClient(socket.id)});  
+  socket.emit('game-state', game_state );
+}
 
 io.on('connection', (socket) => {
     log('Client ' + socket.id +  ' connected from ' + socket.request.connection.remoteAddress);
-    socket.emit('game-state', game_state );
-    socket.on('game-state', () => { log('game-state from ' + socket.id); socket.emit('game-state', game_state );});
-    socket.on('game-new', () => { log('game-new from ' + socket.id); game_state = szyfrant.newGame(); socket.emit('game-state', game_state );});
-    socket.on('game-start-round', () => { log('game-start-round from ' + socket.id); game_state = szyfrant.startRound(game_state); socket.emit('game-state', game_state );});
-    socket.on('disconnect', () => {log('Client ' + socket.id + ' disconnected')});
+
+    socket.on('game-state', () => { 
+      log('game-state from ' + socket.id);
+      sendState(socket);
+    });
+
+    socket.on('game-join-a', () => { 
+      log('team-join-a from' + socket.id);
+      team_a.add(socket.id);
+      team_b.delete(socket.id);
+      sendState(socket);
+    });
+
+    socket.on('game-join-b', () => { 
+      log('team-join-b from' + socket.id);
+      team_a.delete(socket.id);
+      team_b.add(socket.id);
+      sendState(socket);
+    });
+
+    socket.on('game-new', () => { 
+      log('game-new from ' + socket.id); 
+      state = szyfrant.newGame(); 
+      sendState(socket);
+    });
+
+    socket.on('game-start-round', () => { 
+      log('game-start-round from ' + socket.id); 
+      state = szyfrant.startRound(state); 
+      sendState(socket);
+    });
+
+    socket.on('disconnect', () => {
+      log('Client ' + socket.id + ' disconnected');
+    });
 });
 
 server.listen(666, () => {log('Szyfrant server up listening at port 666.')});

@@ -55,7 +55,6 @@ function createGame() {
         words : drawWords(),
         tokens : [[0, 0], [0, 0]],
         round_number : 0,
-        round_state : null,
         past_rounds : []
         });    
 }
@@ -153,7 +152,7 @@ module.exports = {
     GS_PLAYING_ROUND : 2,
     GS_FINISHED : 3,
     
-    S_ENCODING : 11,
+    RS_ENCODING : 11,
     RS_DECODING : 12,
     
     TOKEN_WHITE : 0,
