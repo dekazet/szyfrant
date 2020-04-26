@@ -69,14 +69,19 @@ class App extends Component {
         upgrade: false,
         rejectUnauthorized: false
       });
-    
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from the server');
+        this.setState({connected : false});
+      })
+
     socket.on('connect', () => {
       console.log('Connected to the server');
       this.setState({connected : true});
     })
 
     socket.on('game-state', (game_state) => { 
-      console.log('Received game state');
+      console.log('Received game state ' + game_state);
       this.setState({game_state : game_state}); 
     });
 
@@ -95,9 +100,9 @@ class App extends Component {
 
   render() {
     console.log('Rendering app');
-    let status = 'connected';
+    let status = 'connected :)';
     if (!this.state.connected) {
-      status = 'connecting'
+      status = 'connecting :('
     }
 
     return (
