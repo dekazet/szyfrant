@@ -1,9 +1,8 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
 import './App.css';
+import io from 'socket.io-client'
 
 class CodeEntryForm extends React.Component {
-
 
   constructor(props) {
     super(props);
@@ -22,7 +21,7 @@ class CodeEntryForm extends React.Component {
 
 
   handleSubmit(event) {
-    alert('A code was submitted: ' + this.state.codes);
+    console.log('A code was submitted: ' + this.state.codes);
     event.preventDefault();
   }
 
@@ -47,12 +46,37 @@ class CodeEntryForm extends React.Component {
 }
 
 
-function App() {
-  return (
-    <div className="sampleEntry">
-      <CodeEntryForm />
-    </div>
-  );
+class App extends Component {
+
+  componentDidMount = () => {
+  }
+
+  joinGame() {
+    const socket = io('http://localhost:3000', {
+      reconnectionDelay: 1000,
+      reconnection: true,
+      reconnectionAttemps: 10,
+      transports: ['websocket'],
+      agent: false,
+      upgrade: false,
+      rejectUnauthorized: false
+    });  
+  socket.emit('join');
+  console.log('Socket: ' + socket.id);
+}
+
+
+//        <div className="sampleEntry">
+//         <CodeEntryForm />
+//      </div>
+
+  render() {
+    return (
+      <div>
+        <button onClick={this.joinGame}>Join game</button>
+      </div>
+    );
+  }
 }
 
 export default App;
