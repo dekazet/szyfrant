@@ -2,6 +2,31 @@
   background:#dd7777;
 }
 
+.game-statusbar {
+  background:#dddddd; 
+  width: 640px;
+  height: 40px;
+  margin: 0px auto;
+  display: flex;
+  font-weight: bold;
+  text-align: center;
+}
+
+.game-wordsbar {
+  background:#dddddd; 
+  width: 640px;
+  height: 40px;
+  margin: 0px auto;
+  display: flex;
+  grid-template-columns: 140px 140px 140px 140px;
+}
+
+.game-wordsbar-word {
+  background:#77dd77; 
+  width: 160px;
+  justify-content: center;
+}
+
 .game-board {
   background:#77dd77; 
   width: 640px;

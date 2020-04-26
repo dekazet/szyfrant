@@ -243,13 +243,25 @@ class App extends Component {
 //         <CodeEntryForm />
 //      </div>
 
-  render() {
-    log('Rendering app');
+  showGameBoard() {
+    if (!this.state.connected) {
+      return false;
+    }
 
-    return (
-      <div class="game-main"><GameBoard /></div>
-    );
-    
+    if (this.state.game_state == null) {
+      return false;
+    }
+
+    if (this.state.game_state.team == TEAM_NONE) {
+      return false;
+    }
+
+    return true;
+  }
+
+  genGameHeader() {
+    log('Rendering game header');
+
     if (!this.state.connected) {
       return(<div>Connecting...</div>);
     }
@@ -266,21 +278,58 @@ class App extends Component {
         </div>
       );
     }
-
-    const words = this.state.game_state.words[this.state.game_state.team].map((word) => {
-        return (<li>{word}</li>);
+    let team = "TeamA";
+    if (this.state.game_state.team == TEAM_B) {
+      team = "TeamB";
     }
-    );
+    
+    return (
+    <div class="game-statusbar">
+      <div>{team}</div>
+      <button onClick={this.newGame}>Start new game</button>
+      <button onClick={this.refreshGameState}>Refresh game state</button>
+      <button onClick={this.startRound}>Start the round</button>     
+      <div>Round: {this.state.game_state.round_number + 1}</div>
+    </div>);
+  }
+
+  genWordsBar() {
+    if (  !this.state.game_state 
+          || this.state.game_state.team == -1){
+      return (<div></div>);
+    }
+    const words = this.state.game_state.words[this.state.game_state.team].map((word, index) => {
+      return (<div class="game-wordsbar-word">{index + 1}: {word}</div>);
+    });
+  return (<div class="game-wordsbar">{words}</div>);
+  }
+
+  render() {
+    log('Rendering app');
+
+    const gameHeader = this.genGameHeader();
+    const wordsBar = this.genWordsBar();
+
+    if (this.showGameBoard()) {
+      return (
+        <div class="game-main">
+          {gameHeader}
+          {wordsBar}
+          <GameBoard />
+        </div>
+      );
+    } else {
+      return (
+        <div class="game-main">
+          {gameHeader}
+        </div>);
+    }
 
     const showEncodingForm = true;
     
     return (
       <div>
-        <button onClick={this.newGame}>Start new game</button>
-        <button onClick={this.refreshGameState}>Refresh game state</button>
-        <div><ol>{words}</ol></div>
         <div> {showEncodingForm ? <EncodingForm /> : null }</div>
-        <button onClick={this.startRound}>Start the round</button>
       </div>
     );
   }
