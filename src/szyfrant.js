@@ -66,10 +66,6 @@ function encodeNumber(game, team, encoded_number) {
         log('Invalid team ' + team);        
         return game;
     }
-    if (game.rounds[game.rounds.length - 1].teams[team].encoded_number != '') {
-        log('Number already encoded this round');   
-        return game;
-    }
     game.rounds[game.rounds.length - 1].teams[team].encoded_number = encoded_number;
     return game;
 }
@@ -77,10 +73,6 @@ function encodeNumber(game, team, encoded_number) {
 function decodeNumber(game, team, decoded_number) {
     if (!validTeam(team)) {
         log('Invalid team');        
-        return game;
-    }
-    if (game.rounds[game.rounds.length - 1].teams[team].decoded_number != 0) {
-        log('Number already decoded this round');   
         return game;
     }
     game.rounds[game.rounds.length - 1].teams[team].decoded_number = decoded_number;
@@ -91,7 +83,10 @@ function printGame(game) {
     log('-----------------');
     log(game);
     log('*Current round*')
-    log(game.rounds[game.rounds.length - 1]);
+    log('------ TeamA --------');
+    log(game.rounds[game.rounds.length - 1].teams[0]);
+    log('------ TeamB --------');
+    log(game.rounds[game.rounds.length - 1].teams[1]);
     log('-----------------');
 }
 
@@ -99,6 +94,6 @@ module.exports = {
     newGame : () => {return createGame(); },
     startRound : (game) => { return startRound(game); },
     submitCoded : (game, team, encoded_number) => { return encodeNumber(game, team, encoded_number); },
-    submitDecoded : (game, team, decoded_number) => { return encodeNumber(game, team, decoded_number); },
+    submitDecoded : (game, team, decoded_number) => { return decodeNumber(game, team, decoded_number); },
     printGame : (game) => { printGame(game); },
 };
