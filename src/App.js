@@ -52,6 +52,41 @@ function log(str) {
   console.log(timeStamp() + ' ' + str);
 }
 
+//
+// Round card
+//
+class RoundCardRow extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <div class="game-card-row">
+      <div class='game-card-word'>{this.props.word}</div>
+        <div class='game-card-guess'>{this.props.guess}</div>
+        <div class='game-card-number'>{this.props.number}</div>   
+      </div>
+    );
+  }
+}
+
+class RoundCardHeaderRow extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <div class="game-card-header">
+        <div class='game-card-round'>Round {this.props.roundNumber}</div>
+        <div class='game-card-guess'>?</div>
+        <div class='game-card-number'>$</div>   
+      </div>
+    );
+  }
+}
+
 class RoundCard extends React.Component {
   constructor(props) {
     super(props)
@@ -60,31 +95,15 @@ class RoundCard extends React.Component {
   render() {
     return(
     <div class="game-card">
-      <div class="game-card-header">
-        <div class='game-card-round'>Round {this.props.roundNumber}</div>
-        <div class='game-card-guess'>?</div>
-        <div class='game-card-number'>$</div>   
-      </div>
-      <div class="game-card-row">
-      <div class='game-card-word'>Kaszanka</div>
-        <div class='game-card-guess'>3</div>
-        <div class='game-card-number'>4</div>   
-      </div>
-      <div class="game-card-row">
-      <div class='game-card-word'>Zajac</div>
-        <div class='game-card-guess'>6</div>
-        <div class='game-card-number'>7</div>   
-      </div>
-      <div class="game-card-row">
-      <div class='game-card-word'>Jaja</div>
-        <div class='game-card-guess'>6</div>
-        <div class='game-card-number'>5</div>   
-      </div>
+      <RoundCardHeaderRow roundNumber={this.props.roundNumber} />
+      <RoundCardRow word={this.props.words[0]} guess={this.props.guesses[0]} number={this.props.numbers[0]} />
+      <RoundCardRow word={this.props.words[1]} guess={this.props.guesses[1]} number={this.props.numbers[1]} />
+      <RoundCardRow word={this.props.words[2]} guess={this.props.guesses[2]} number={this.props.numbers[2]} />
     </div>)
   }
 }
 
-
+// Opennents hints
 class GameBoardKyes extends React.Component {
   constructor(props) {
     super(props)
@@ -103,24 +122,29 @@ class GameBoardKyes extends React.Component {
   }
 }
 
+//
+// Game board
+//
 class GameBoard extends React.Component {
   constructor(props) {
     super(props)
   }  
 
   render() {
+
     return (
     <div class="game-board-with-keys">
       <div class="game-board">
-        <RoundCard roundNumber="1"/>
-        <RoundCard roundNumber="2"/>
-        <RoundCard roundNumber="3"/>
-        <RoundCard roundNumber="4"/>
-        <RoundCard roundNumber="5"/>
-        <RoundCard roundNumber="6"/>
-        <RoundCard roundNumber="7"/>
-        <RoundCard roundNumber="8"/>
+      <RoundCard roundNumber="1" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+      <RoundCard roundNumber="2" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+      <RoundCard roundNumber="3" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+      <RoundCard roundNumber="4" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+      <RoundCard roundNumber="5" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+      <RoundCard roundNumber="6" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+      <RoundCard roundNumber="7" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+      <RoundCard roundNumber="8" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
       </div>
+
       <div class="game-board-hints-row">
         <GameBoardKyes name="#1" hints={["krowa", "jadzia", "maslak"]}/>
         <GameBoardKyes name="#2" hints={["krowa", "jadzia", "maslak"]}/>
@@ -132,7 +156,10 @@ class GameBoard extends React.Component {
   }
 }
 
-class EncodingForm extends React.Component {
+//
+// Input form
+//
+class CodeEntryForm extends React.Component {
 
   constructor(props) {
     super(props);
@@ -153,16 +180,19 @@ class EncodingForm extends React.Component {
   handleSubmit(event) {
     log('A code was submitted: ' + this.state.codes);
     event.preventDefault();
+    this.props.socket.emit('game-submit-codednumber', 0, this.state.codes);
   }
 
   render() {
     return(
-      <form onSubmit={this.handleSubmit}>
-        <input type="text" value={this.state.codes[0]} onChange={(event) => {this.handleChange(0, event)}} />
-        <input type="text" value={this.state.codes[1]} onChange={(event) => {this.handleChange(1, event)}} />
-        <input type="text" value={this.state.codes[2]} onChange={(event) => {this.handleChange(2, event)}} />
-        <input type="submit" value="Wyslij wiadomosc" />
-       </form>
+      <div class="code-entry-form">
+        <form onSubmit={this.handleSubmit}>
+          <div class="code-entry-field"><input type="text" value={this.state.codes[0]} onChange={(event) => {this.handleChange(0, event)}} /></div>
+          <div class="code-entry-field"><input type="text" value={this.state.codes[1]} onChange={(event) => {this.handleChange(1, event)}} /></div>
+          <div class="code-entry-field"><input type="text" value={this.state.codes[2]} onChange={(event) => {this.handleChange(2, event)}} /></div>
+          <div class="code-entry-button"><input type="submit" value="Wyslij wiadomosc" /></div>
+        </form>
+      </div>
     );
   }
 }
@@ -304,18 +334,26 @@ class App extends Component {
   return (<div class="game-wordsbar">{words}</div>);
   }
 
+  genBoardState() {
+    return ({
+
+    });
+  }
+
   render() {
     log('Rendering app');
 
     const gameHeader = this.genGameHeader();
     const wordsBar = this.genWordsBar();
+    const boardState = this.genBoardState();
 
     if (this.showGameBoard()) {
       return (
         <div class="game-main">
           {gameHeader}
           {wordsBar}
-          <GameBoard />
+          <GameBoard board_state={boardState}/>
+          <CodeEntryForm socket={this.state.socket}/>
         </div>
       );
     } else {
@@ -324,14 +362,6 @@ class App extends Component {
           {gameHeader}
         </div>);
     }
-
-    const showEncodingForm = true;
-    
-    return (
-      <div>
-        <div> {showEncodingForm ? <EncodingForm /> : null }</div>
-      </div>
-    );
   }
 }
 

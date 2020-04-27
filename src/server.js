@@ -80,6 +80,12 @@ io.on('connection', (socket) => {
       sendState(socket);
     });
 
+    socket.on('game-submit-codednumber', (team, codedNumber) => { 
+      log('game-submit-codednumber from ' + socket.id); 
+      state = szyfrant.submitCoded(state, team, codedNumber); 
+      sendState(socket);
+    });
+
     socket.on('disconnect', () => {
       log('Client ' + socket.id + ' disconnected');
     });
