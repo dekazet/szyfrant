@@ -3,36 +3,6 @@ import './App.css';
 import io from 'socket.io-client'
 var szyfrant = require('./szyfrant');
 
-var gameSample = 
-{
-  state: 2,
-  round: 
-  {
-    state: 11,
-    teams: [
-      {
-        drawn_number: 411,
-        encoded_number: '',
-        decoded_number: 0,
-        oponnents_number: 0
-      },
-      {
-        drawn_number: 234,
-        encoded_number: '',
-        decoded_number: 0,
-        oponnents_number: 0
-      }
-    ]
-  },
-  words: [
-    [ 'ZMYWACZ', 'RĘKAWICA', 'SIŁA', 'MIEDŹ' ],
-    [ 'FENIKS', 'ZWOJE', 'OLIMP', 'TANIEC' ]
-  ],
-  tokens: [ [ 0, 0 ], [ 0, 0 ] ],
-  round_number: 0,
-  past_rounds: []
-}
-
 function timeStamp() {
   var now = new Date();
   var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
@@ -135,21 +105,21 @@ class GameBoard extends React.Component {
     return (
     <div class="game-board-with-keys">
       <div class="game-board">
-      <RoundCard roundNumber="1" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="2" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="3" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="4" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="5" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="6" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="7" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="8" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+      <RoundCard roundNumber="1" words={this.props.board_state.words[0]} guesses={this.props.board_state.guesses[0]} numbers={this.props.board_state.numbers[0]}/>
+      <RoundCard roundNumber="2" words={this.props.board_state.words[0]} guesses={this.props.board_state.guesses[0]} numbers={this.props.board_state.numbers[0]}/>
+      <RoundCard roundNumber="3" words={this.props.board_state.words[0]} guesses={this.props.board_state.guesses[0]} numbers={this.props.board_state.numbers[0]}/>
+      <RoundCard roundNumber="4" words={this.props.board_state.words[0]} guesses={this.props.board_state.guesses[0]} numbers={this.props.board_state.numbers[0]}/>
+      <RoundCard roundNumber="5" words={this.props.board_state.words[0]} guesses={this.props.board_state.guesses[0]} numbers={this.props.board_state.numbers[0]}/>
+      <RoundCard roundNumber="6" words={this.props.board_state.words[0]} guesses={this.props.board_state.guesses[0]} numbers={this.props.board_state.numbers[0]}/>
+      <RoundCard roundNumber="7" words={this.props.board_state.words[0]} guesses={this.props.board_state.guesses[0]} numbers={this.props.board_state.numbers[0]}/>
+      <RoundCard roundNumber="8" words={this.props.board_state.words[0]} guesses={this.props.board_state.guesses[0]} numbers={this.props.board_state.numbers[0]}/>
       </div>
 
       <div class="game-board-hints-row">
-        <GameBoardKyes name="#1" hints={["krowa", "jadzia", "maslak"]}/>
-        <GameBoardKyes name="#2" hints={["krowa", "jadzia", "maslak"]}/>
-        <GameBoardKyes name="#3" hints={["madzia", "jadzia", "maslak"]}/>
-        <GameBoardKyes name="#4" hints={["jadzia", "maslak"]}/>
+      <GameBoardKyes name="#1" hints={this.props.board_state.hints[0]}/>
+      <GameBoardKyes name="#2" hints={this.props.board_state.hints[1]}/>
+      <GameBoardKyes name="#3" hints={this.props.board_state.hints[2]}/>
+      <GameBoardKyes name="#4" hints={this.props.board_state.hints[3]}/>
       </div>
     </div>
     );
@@ -335,8 +305,29 @@ class App extends Component {
   }
 
   genBoardState() {
-    return ({
+    let words = Array(8).fill(['', '', '']);
+    let numbers = Array(8).fill(['', '', '']);
+    let guesses = Array(8).fill(['', '', '']);
+    
+    log('plunk');
+    log(this.state);
 
+    if (this.state.game_state) {
+      log('plunk1');
+      const rounds = this.state.game_state.rounds;
+      if (rounds) {
+        log('plunk2');
+        for (var i = 0; i < rounds.length; i++) {
+          words[i] = rounds[i][0];
+        }
+      }
+    }
+
+    return ({
+      words : words,
+      numbers : numbers,
+      guesses : guesses,
+      hints : [['a'], ['b'], [], ['x']]
     });
   }
 

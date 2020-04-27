@@ -44,6 +44,8 @@ function teamFromClient(id) {
 function sendState(socket) {
   let game_state = Object.assign({}, state, {team : teamFromClient(socket.id)});  
   socket.emit('game-state', game_state );
+  log('Sending state to client ' + socket.id);
+  szyfrant.printGame(game_state);
 }
 
 io.on('connection', (socket) => {
