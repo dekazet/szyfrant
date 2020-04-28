@@ -96,6 +96,8 @@ io.on('connection', (socket) => {
     
     socket.on('disconnect', () => {
       log('Client ' + socket.id + ' disconnected');
+      team_a.delete(socket.id);
+      team_b.delete(socket.id);
     });
 });
 

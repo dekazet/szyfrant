@@ -300,9 +300,6 @@ class App extends React.Component {
     joinTeamB() {
       this.state.socket.emit('game-join-b');     
     }
-//        <div className="sampleEntry">
-//         <CodeEntryForm />
-//      </div>
 
   showGameBoard() {
     if (!this.state.connected) {
