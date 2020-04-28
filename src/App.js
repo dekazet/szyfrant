@@ -172,6 +172,7 @@ class CodeButton extends React.Component {
     if (!this.state.showingNumber && delta < 500) {
       const newText = this.props.numer;
       this.setState({lastClick : now, display : newText, showingNumber : true});
+      setTimeout(this.onClick.bind(this), 2000);
       return;
     } 
 
