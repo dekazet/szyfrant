@@ -43,11 +43,12 @@ class RoundCardRow extends React.Component {
 
 class RoundCardHeaderRow extends React.Component {
   render() {
+    const floppy = '\u25a0';
     return (
       <div class="game-card-header">
-        <div class='game-card-round'>Round {this.props.roundNumber}</div>
+        <div class='game-card-round'>Runda 0{this.props.roundNumber}</div>
         <div class='game-card-guess'>?</div>
-        <div class='game-card-number'>$</div>   
+        <div class='game-card-number'>{floppy}</div>   
       </div>
     );
   }
@@ -309,8 +310,6 @@ class App extends React.Component {
   }
 
   genGameHeader() {
-    log('Rendering game header');
-
     if (!this.state.connected) {
       return(<div>Connecting...</div>);
     }
@@ -343,10 +342,10 @@ class App extends React.Component {
     return (
     <div class="game-statusbar">
       <div>{team}</div>
-      <button onClick={this.newGame}>Start new game</button>
-      <button onClick={this.refreshGameState}>Refresh game state</button>
-      <button onClick={this.startRound}>Start next round</button>
-      <div>Round: {this.state.game_state.rounds.length}</div>
+      <button onClick={this.newGame}>Nowa gra</button>
+      <button onClick={this.refreshGameState}>Refresh</button>
+      <button onClick={this.startRound}>Nastepna runda</button>
+      <div>Runda: 0{this.state.game_state.rounds.length}</div>
       <CodeButton numer={drawnNumber}/>
     </div>);
   }
@@ -432,8 +431,10 @@ class App extends React.Component {
           {gameHeader}
           {wordsBar}
           <GameBoard board_state={boardState}/>
-          <CodeEntryForm socket={this.state.socket}/>
-          <NumberEntryForm socket={this.state.socket}/>
+          <div class="game-inputbar">
+            <CodeEntryForm socket={this.state.socket}/>
+            <NumberEntryForm socket={this.state.socket}/>
+          </div>
         </div>
       );
     } else {
