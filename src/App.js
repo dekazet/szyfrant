@@ -1,11 +1,10 @@
-import React, {Component} from 'react';
+import React from 'react';
 import './App.css';
 import io from 'socket.io-client'
 
 const TEAM_NONE = -1;
 const TEAM_A = 0;
 const TEAM_B = 1;
-
 
 function timeStamp() {
   var now = new Date();
@@ -24,7 +23,7 @@ function timeStamp() {
 
 function log(str) {
   console.log(timeStamp() + ' ' + str);
-  console.log(JSON.stringify(str, null, 4));
+  //console.log(JSON.stringify(str, null, 4));
 }
 
 //
@@ -154,6 +153,39 @@ class CodeEntryForm extends React.Component {
     );
   }
 }
+
+class NumberEntryForm extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {number: ''};
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({number : event.target.value})
+  }
+
+  handleSubmit(event) {
+    log('A number was submitted: ' + this.state.number);
+    event.preventDefault();
+    this.props.socket.emit('game-submit-decodednumber', TEAM_A, this.state.number);
+  }
+
+  render() {
+    return(
+      <div class="code-entry-form">
+        <form onSubmit={this.handleSubmit}>
+          <div class="code-entry-field"><input type="text" value={this.state.number} onChange={this.handleChange} /></div>
+          <div class="code-entry-button"><input type="submit" value="Odszyfruj numer" /></div>
+        </form>
+      </div>
+    );
+  }
+}
+
 
 class CodeButton extends React.Component {
   constructor(props) {
@@ -300,13 +332,22 @@ class App extends React.Component {
       team = "TeamB";
     }
     
+    let drawnNumber = 0;
+    if (this.state.game_state) {
+      const rounds = this.state.game_state.rounds;
+      const round = rounds[rounds.length - 1];
+      const team = round.teams[TEAM_A];
+      drawnNumber = team.drawn_number;
+    }
+
     return (
     <div class="game-statusbar">
       <div>{team}</div>
       <button onClick={this.newGame}>Start new game</button>
       <button onClick={this.refreshGameState}>Refresh game state</button>
-      <button onClick={this.startRound}>Start the round</button>     
+      <button onClick={this.startRound}>Start next round</button>
       <div>Round: {this.state.game_state.rounds.length}</div>
+      <CodeButton numer={drawnNumber}/>
     </div>);
   }
 
@@ -321,29 +362,51 @@ class App extends React.Component {
   return (<div class="game-wordsbar">{words}</div>);
   }
 
+  digits
+
   genBoardState() {
+    let i = 0;
     let words = Array(8);
-    for (var i = 0; i < 8; i++) {
+    for (i = 0; i < 8; i++) {
       words[i] = Array(3).fill(['']);
     }
 
     let numbers = Array(8);
-    for (var i = 0; i < 8; i++) {
+    for (i = 0; i < 8; i++) {
       numbers[i] = Array(3).fill(['']);
     }
 
     let guesses = Array(8);
-    for (var i = 0; i < 8; i++) {
+    for (i = 0; i < 8; i++) {
       guesses[i] = Array(3).fill(['']);
+    }
+
+    let hints = Array(4);
+    for (i = 0; i < 4; i++) {
+      hints[i] = [];
     }
 
     if (this.state.game_state) {
       const rounds = this.state.game_state.rounds;
       if (rounds) {
-        for (var i = 0; i < rounds.length; i++) {
-          words[i][0] = rounds[i].teams[TEAM_A].encoded_number[0];
-          words[i][1] = rounds[i].teams[TEAM_A].encoded_number[1];
-          words[i][2] = rounds[i].teams[TEAM_A].encoded_number[2];
+        for (i = 0; i < rounds.length; i++) {
+          words[i] = rounds[i].teams[TEAM_A].encoded_number.slice();
+         
+          if (rounds[i].teams[TEAM_A].decoded_number) {
+            guesses[i] = (""+rounds[i].teams[TEAM_A].decoded_number).split("");          
+            numbers[i] = (""+rounds[i].teams[TEAM_A].drawn_number).split("");          
+          }
+
+          // if another team posted the guess assign hints to hint buckets
+          if (rounds[i].teams[TEAM_A].decoded_number) {
+            var hintBuckets = (""+rounds[i].teams[TEAM_A].drawn_number).split("");          
+            log(hintBuckets);
+            for (var j = 0; j < 3; j++) {
+              hints[hintBuckets[j] - 1].push(rounds[i].teams[TEAM_A].encoded_number[j]);
+            }            
+            
+          }
+
         }
       }
     }
@@ -352,7 +415,7 @@ class App extends React.Component {
       words : words,
       numbers : numbers,
       guesses : guesses,
-      hints : [['a'], ['b'], [], ['x']]
+      hints : hints
     });
   }
 
@@ -362,15 +425,7 @@ class App extends React.Component {
     const gameHeader = this.genGameHeader();
     const wordsBar = this.genWordsBar();
     const boardState = this.genBoardState();
-    let drawnNumber = 0;
     
-    if (this.state.game_state) {
-      const rounds = this.state.game_state.rounds;
-      const round = rounds[rounds.length - 1];
-      const team = round.teams[TEAM_A];
-      drawnNumber = team.drawn_number;
-    }
-
     if (this.showGameBoard()) {
       return (
         <div class="game-main">
@@ -378,7 +433,7 @@ class App extends React.Component {
           {wordsBar}
           <GameBoard board_state={boardState}/>
           <CodeEntryForm socket={this.state.socket}/>
-          <CodeButton numer={drawnNumber}/>
+          <NumberEntryForm socket={this.state.socket}/>
         </div>
       );
     } else {

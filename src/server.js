@@ -88,6 +88,18 @@ io.on('connection', (socket) => {
       sendState(socket);
     });
 
+    socket.on('game-submit-decodednumber', (team, number) => { 
+      log('game-submit-decodednumber from ' + socket.id); 
+      state = szyfrant.submitDecoded(state, team, number); 
+      sendState(socket);
+    });
+    
+    socket.on("*",function(event,data) {
+      log('catch-all from ' + socket.id); 
+      log(event); 
+      log(data); 
+  });
+
     socket.on('disconnect', () => {
       log('Client ' + socket.id + ' disconnected');
     });
