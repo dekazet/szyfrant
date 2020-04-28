@@ -259,16 +259,7 @@ class App extends React.Component {
   }
 
   componentDidMount = () => {
-      const socket = io('http://localhost:3000', {
-        forceNew : true,
-        reconnectionDelay: 1000,
-        reconnection: true,
-        reconnectionAttemps: 10,
-        transports: ['websocket'],
-        agent: false,
-        upgrade: false,
-        rejectUnauthorized: false
-      });
+      const socket = io('http://localhost:3000');
 
     socket.on('disconnect', () => {
         log('Disconnected from the server');
