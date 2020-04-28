@@ -1,7 +1,6 @@
 body {  
   background:#eeeedd;
   font: Courier New,monospace;
-  font-size: 18x;
 }
 
 .game-main {
@@ -104,7 +103,7 @@ body {
 }
 
 .game-card-header {
-	background:#bdc8ce;
+	background:#c8c4a5;
   display: flex;
   font-weight: bold;
   padding: 1px;
@@ -166,7 +165,7 @@ body {
 }
 
 .game-board-keys-header {
-  background:#bdc8ce;
+  background:#c8c4a5;
   height: 24px;
   font-size: 18px;
   padding : 5px;
