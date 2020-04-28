@@ -45,7 +45,7 @@ function sendState(socket) {
   let game_state = Object.assign({}, state, {team : teamFromClient(socket.id)});  
   socket.emit('game-state', game_state );
   log('Sending state to client ' + socket.id);
-  szyfrant.printGame(game_state);
+  //szyfrant.printGame(game_state);
 }
 
 io.on('connection', (socket) => {
@@ -94,12 +94,6 @@ io.on('connection', (socket) => {
       sendState(socket);
     });
     
-    socket.on("*",function(event,data) {
-      log('catch-all from ' + socket.id); 
-      log(event); 
-      log(data); 
-  });
-
     socket.on('disconnect', () => {
       log('Client ' + socket.id + ' disconnected');
     });

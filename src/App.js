@@ -41,6 +41,18 @@ class RoundCardRow extends React.Component {
   }
 }
 
+class RoundCardRowLight extends React.Component {
+  render() {
+    return (
+      <div class="game-card-row-light">
+      <div class='game-card-word'>{this.props.word}</div>
+        <div class='game-card-guess'>{this.props.guess}</div>
+        <div class='game-card-number'>{this.props.number}</div>   
+      </div>
+    );
+  }
+}
+
 class RoundCardHeaderRow extends React.Component {
   render() {
     const floppy = '\u25a0';
@@ -59,9 +71,9 @@ class RoundCard extends React.Component {
     return(
     <div class="game-card">
       <RoundCardHeaderRow roundNumber={this.props.roundNumber} />
-      <RoundCardRow word={this.props.words[0]} guess={this.props.guesses[0]} number={this.props.numbers[0]} />
+      <RoundCardRowLight word={this.props.words[0]} guess={this.props.guesses[0]} number={this.props.numbers[0]} />
       <RoundCardRow word={this.props.words[1]} guess={this.props.guesses[1]} number={this.props.numbers[1]} />
-      <RoundCardRow word={this.props.words[2]} guess={this.props.guesses[2]} number={this.props.numbers[2]} />
+      <RoundCardRowLight word={this.props.words[2]} guess={this.props.guesses[2]} number={this.props.numbers[2]} />
     </div>)
   }
 }
@@ -93,21 +105,25 @@ class GameBoard extends React.Component {
     return (    
       <div class="game-board-with-keys">
         <div class="game-board">
-          {this.generateRoundCard(0)}
-          {this.generateRoundCard(1)}
-          {this.generateRoundCard(2)}
-          {this.generateRoundCard(3)}
-          {this.generateRoundCard(4)}
-          {this.generateRoundCard(5)}
-          {this.generateRoundCard(6)}
-          {this.generateRoundCard(7)}
+          <div class="board-column">
+            {this.generateRoundCard(0)}
+            {this.generateRoundCard(1)}
+            {this.generateRoundCard(2)}
+            {this.generateRoundCard(3)}
+          </div>
+          <div class="board-column">
+            {this.generateRoundCard(4)}
+            {this.generateRoundCard(5)}
+            {this.generateRoundCard(6)}
+            {this.generateRoundCard(7)}
+          </div>
         </div>
 
         <div class="game-board-hints-row">
-          <GameBoardKyes name="#1" hints={this.props.board_state.hints[0]}/>
-          <GameBoardKyes name="#2" hints={this.props.board_state.hints[1]}/>
-          <GameBoardKyes name="#3" hints={this.props.board_state.hints[2]}/>
-          <GameBoardKyes name="#4" hints={this.props.board_state.hints[3]}/>
+          <GameBoardKyes name="Key 1" hints={this.props.board_state.hints[0]}/>
+          <GameBoardKyes name="Key 2" hints={this.props.board_state.hints[1]}/>
+          <GameBoardKyes name="Key 3" hints={this.props.board_state.hints[2]}/>
+          <GameBoardKyes name="Key 4" hints={this.props.board_state.hints[3]}/>
         </div>
       </div>
     );
@@ -218,7 +234,7 @@ class CodeButton extends React.Component {
   }
 
   render() {
-    return (<button onClick={this.onClick.bind(this)}>{this.state.display}</button>);
+    return (<button class="game-infobar-button" onClick={this.onClick.bind(this)}>{this.state.display}</button>);
   }
 }
 
@@ -311,7 +327,7 @@ class App extends React.Component {
 
   genGameHeader() {
     if (!this.state.connected) {
-      return(<div>Connecting...</div>);
+      return(<div>Connecting to the game server...</div>);
     }
 
     if (this.state.game_state == null) {
@@ -320,9 +336,9 @@ class App extends React.Component {
 
     if (this.state.game_state.team === TEAM_NONE) {
       return(
-        <div>
-          <button onClick={this.joinTeamA}>Join team A</button>
-          <button onClick={this.joinTeamB}>Join team B</button>
+        <div class="game-join-buttons">
+          <button class="game-infobar-button" onClick={this.joinTeamA}>Join team A</button>
+          <button class="game-infobar-button" onClick={this.joinTeamB}>Join team B</button>
         </div>
       );
     }
@@ -341,11 +357,11 @@ class App extends React.Component {
 
     return (
     <div class="game-statusbar">
-      <div>{team}</div>
-      <button onClick={this.newGame}>Nowa gra</button>
-      <button onClick={this.refreshGameState}>Refresh</button>
-      <button onClick={this.startRound}>Nastepna runda</button>
-      <div>Runda: 0{this.state.game_state.rounds.length}</div>
+      <div class="game-infobar-text">{team}</div>
+      <button class="game-infobar-button" onClick={this.newGame}>Nowa gra</button>
+      <button class="game-infobar-button" onClick={this.refreshGameState}>Refresh</button>
+      <button class="game-infobar-button" onClick={this.startRound}>Nastepna runda</button>
+      <div class="game-infobar-text">Runda: 0{this.state.game_state.rounds.length}</div>
       <CodeButton numer={drawnNumber}/>
     </div>);
   }
@@ -420,7 +436,7 @@ class App extends React.Component {
 
   render() {
     log('Rendering app');
-
+    
     const gameHeader = this.genGameHeader();
     const wordsBar = this.genWordsBar();
     const boardState = this.genBoardState();
@@ -428,6 +444,7 @@ class App extends React.Component {
     if (this.showGameBoard()) {
       return (
         <div class="game-main">
+          <div class="game-titlebar"><h1>S Z Y F R A N T</h1></div>
           {gameHeader}
           {wordsBar}
           <GameBoard board_state={boardState}/>
@@ -440,6 +457,7 @@ class App extends React.Component {
     } else {
       return (
         <div class="game-main">
+          <div class="game-titlebar"><h1>S Z Y F R A N T</h1></div>
           {gameHeader}
         </div>);
     }
