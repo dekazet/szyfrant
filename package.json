@@ -34,5 +34,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:666/socket.io" 
+  "proxy": "http://localhost:666/socket.io"
 }

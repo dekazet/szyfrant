@@ -9,9 +9,6 @@ function logObject(obj) {
     console.log(JSON.stringify(obj, null, 4));
 }
 
-const TOKEN_WHITE = 0;
-const TOKEN_BLACK = 1;
-
 function drawNumber() {
     return numbers[Math.floor(Math.random() * numbers.length)];
 }
@@ -19,9 +16,8 @@ function drawNumber() {
 function createRoundTeamEntry() {
     return({
         drawn_number : drawNumber(),
-        encoded_number : '',
+        encoded_number : ['', '', ''],
         decoded_number : 0,
-        oponnents_number : 0
     });
 }
 
@@ -39,11 +35,8 @@ function drawWords() {
 
 function createGame() {
     return ({ 
-        round : createRound(),
         words : drawWords(),
-        tokens : [[0, 0], [0, 0]],
-        round_number : 0,
-        past_rounds : []
+        rounds : [createRound()]
         });    
 }
 
@@ -59,14 +52,13 @@ function validTeam(team) {
 }
 
 function startRound(game) {
-    if (game.round_number == 7) {
+    if (game.rounds.length == 8) {
         log('Already started 8th round');
         return game;
     }
-    const currentRound = game.round;
-    let past_rounds = game.past_rounds.slice();
-    past_rounds.push(currentRound);
-    return Object.assign({}, game, {past_rounds : past_rounds, round : createRound(), round_number : game.round_number + 1});;
+    let rounds = game.rounds.slice();
+    rounds.push(createRound());
+    return Object.assign({}, game, {rounds : rounds});;
 }
 
 function encodeNumber(game, team, encoded_number) {
@@ -74,11 +66,7 @@ function encodeNumber(game, team, encoded_number) {
         log('Invalid team ' + team);        
         return game;
     }
-    if (game.round.teams[team].encoded_number != '') {
-        log('Number already encoded this round');   
-        return game;
-    }
-    game.round.teams[team].encoded_number = encoded_number;
+    game.rounds[game.rounds.length - 1].teams[team].encoded_number = encoded_number;
     return game;
 }
 
@@ -87,42 +75,18 @@ function decodeNumber(game, team, decoded_number) {
         log('Invalid team');        
         return game;
     }
-    if (game.round.teams[team].decoded_number != 0) {
-        log('Number already decoded this round');   
-        return game;
-    }
-    game.round.teams[team].decoded_number = decoded_number;
-    return game;
-}
-
-function addToken(game, team, token) {
-    game.tokens[team][token] = game.tokens[team][token] + 1;
-    if (game.tokens[team][token] == 2) {
-        
-    }
-}
-
-function guessOponnentsNumber(game, team, oponnents_number) {
-    if (!validTeam(team)) {
-        log('Invalid team ' + team);        
-        return game;
-    }
-    if (game.round.teams[team].oponnents_number != 0) {
-        log('Number already decoded this round');   
-        return game;
-    }   
-    game.round.teams[team].oponnents_number = oponnents_number; 
-    if (oponnents_number == game.round.teams[otherTeam(team)].drawn_number) {
-        game.tokens[team][TOKEN_WHITE] = game.tokens[team][TOKEN_WHITE] + 1;
-    }
+    game.rounds[game.rounds.length - 1].teams[team].decoded_number = decoded_number;
     return game;
 }
 
 function printGame(game) {
     log('-----------------');
     log(game);
-    log('**')
-    log(game.round);
+    log('*Current round*')
+    log('------ TeamA --------');
+    log(game.rounds[game.rounds.length - 1].teams[0]);
+    log('------ TeamB --------');
+    log(game.rounds[game.rounds.length - 1].teams[1]);
     log('-----------------');
 }
 
@@ -130,8 +94,6 @@ module.exports = {
     newGame : () => {return createGame(); },
     startRound : (game) => { return startRound(game); },
     submitCoded : (game, team, encoded_number) => { return encodeNumber(game, team, encoded_number); },
+    submitDecoded : (game, team, decoded_number) => { return decodeNumber(game, team, decoded_number); },
     printGame : (game) => { printGame(game); },
-
-    TOKEN_WHITE : 0,
-    TOKEN_BLACK : 1,
 };

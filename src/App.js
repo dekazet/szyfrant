@@ -1,37 +1,10 @@
-import React, {Component} from 'react';
+import React from 'react';
 import './App.css';
 import io from 'socket.io-client'
-var szyfrant = require('./szyfrant');
 
-var gameSample = 
-{
-  state: 2,
-  round: 
-  {
-    state: 11,
-    teams: [
-      {
-        drawn_number: 411,
-        encoded_number: '',
-        decoded_number: 0,
-        oponnents_number: 0
-      },
-      {
-        drawn_number: 234,
-        encoded_number: '',
-        decoded_number: 0,
-        oponnents_number: 0
-      }
-    ]
-  },
-  words: [
-    [ 'ZMYWACZ', 'RĘKAWICA', 'SIŁA', 'MIEDŹ' ],
-    [ 'FENIKS', 'ZWOJE', 'OLIMP', 'TANIEC' ]
-  ],
-  tokens: [ [ 0, 0 ], [ 0, 0 ] ],
-  round_number: 0,
-  past_rounds: []
-}
+const TEAM_NONE = -1;
+const TEAM_A = 0;
+const TEAM_B = 1;
 
 function timeStamp() {
   var now = new Date();
@@ -50,16 +23,13 @@ function timeStamp() {
 
 function log(str) {
   console.log(timeStamp() + ' ' + str);
+  //console.log(JSON.stringify(str, null, 4));
 }
 
 //
 // Round card
 //
 class RoundCardRow extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return (
       <div class="game-card-row">
@@ -71,44 +41,45 @@ class RoundCardRow extends React.Component {
   }
 }
 
-class RoundCardHeaderRow extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
+class RoundCardRowLight extends React.Component {
   render() {
     return (
+      <div class="game-card-row-light">
+      <div class='game-card-word'>{this.props.word}</div>
+        <div class='game-card-guess'>{this.props.guess}</div>
+        <div class='game-card-number'>{this.props.number}</div>   
+      </div>
+    );
+  }
+}
+
+class RoundCardHeaderRow extends React.Component {
+  render() {
+    const floppy = '\u25a0';
+    return (
       <div class="game-card-header">
-        <div class='game-card-round'>Round {this.props.roundNumber}</div>
+        <div class='game-card-round'>Runda 0{this.props.roundNumber}</div>
         <div class='game-card-guess'>?</div>
-        <div class='game-card-number'>$</div>   
+        <div class='game-card-number'>{floppy}</div>   
       </div>
     );
   }
 }
 
 class RoundCard extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return(
     <div class="game-card">
       <RoundCardHeaderRow roundNumber={this.props.roundNumber} />
-      <RoundCardRow word={this.props.words[0]} guess={this.props.guesses[0]} number={this.props.numbers[0]} />
+      <RoundCardRowLight word={this.props.words[0]} guess={this.props.guesses[0]} number={this.props.numbers[0]} />
       <RoundCardRow word={this.props.words[1]} guess={this.props.guesses[1]} number={this.props.numbers[1]} />
-      <RoundCardRow word={this.props.words[2]} guess={this.props.guesses[2]} number={this.props.numbers[2]} />
+      <RoundCardRowLight word={this.props.words[2]} guess={this.props.guesses[2]} number={this.props.numbers[2]} />
     </div>)
   }
 }
 
 // Opennents hints
 class GameBoardKyes extends React.Component {
-  constructor(props) {
-    super(props)
-  }  
-
   render() {
     const generateHints = this.props.hints.map((hint) => {
       return (<div class="game-board-keys-hint">{hint}</div>);
@@ -126,32 +97,39 @@ class GameBoardKyes extends React.Component {
 // Game board
 //
 class GameBoard extends React.Component {
-  constructor(props) {
-    super(props)
-  }  
-
+  generateRoundCard(i) {
+    return (<RoundCard roundNumber={i+1} words={this.props.board_state.words[i]} guesses={this.props.board_state.guesses[i]} numbers={this.props.board_state.numbers[i]}/>);
+  }
+  
   render() {
-
-    return (
-    <div class="game-board-with-keys">
+    return (    
       <div class="game-board">
-      <RoundCard roundNumber="1" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="2" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="3" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="4" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="5" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="6" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="7" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
-      <RoundCard roundNumber="8" words={['', '', '']} guesses={['', '', '']} numbers={['', '', '']}/>
+        <div class="board-column">
+          {this.generateRoundCard(0)}
+          {this.generateRoundCard(1)}
+          {this.generateRoundCard(2)}
+          {this.generateRoundCard(3)}
+        </div>
+        <div class="board-column">
+          {this.generateRoundCard(4)}
+          {this.generateRoundCard(5)}
+          {this.generateRoundCard(6)}
+          {this.generateRoundCard(7)}
+        </div>
       </div>
+    );
+  }
+}
 
-      <div class="game-board-hints-row">
-        <GameBoardKyes name="#1" hints={["krowa", "jadzia", "maslak"]}/>
-        <GameBoardKyes name="#2" hints={["krowa", "jadzia", "maslak"]}/>
-        <GameBoardKyes name="#3" hints={["madzia", "jadzia", "maslak"]}/>
-        <GameBoardKyes name="#4" hints={["jadzia", "maslak"]}/>
+class HintsBoard extends React.Component {
+  render() {
+    return(
+      <div class="game-board-hints">
+        <GameBoardKyes name="Klucz #1" hints={this.props.board_state.hints[0]}/>
+        <GameBoardKyes name="Klucz #2" hints={this.props.board_state.hints[1]}/>
+        <GameBoardKyes name="Klucz #3" hints={this.props.board_state.hints[2]}/>
+        <GameBoardKyes name="Klucz #4" hints={this.props.board_state.hints[3]}/>
       </div>
-    </div>
     );
   }
 }
@@ -180,29 +158,91 @@ class CodeEntryForm extends React.Component {
   handleSubmit(event) {
     log('A code was submitted: ' + this.state.codes);
     event.preventDefault();
-    this.props.socket.emit('game-submit-codednumber', 0, this.state.codes);
+    this.props.socket.emit('game-submit-codednumber', TEAM_A, this.state.codes);
   }
 
   render() {
     return(
       <div class="code-entry-form">
         <form onSubmit={this.handleSubmit}>
-          <div class="code-entry-field"><input type="text" value={this.state.codes[0]} onChange={(event) => {this.handleChange(0, event)}} /></div>
-          <div class="code-entry-field"><input type="text" value={this.state.codes[1]} onChange={(event) => {this.handleChange(1, event)}} /></div>
-          <div class="code-entry-field"><input type="text" value={this.state.codes[2]} onChange={(event) => {this.handleChange(2, event)}} /></div>
-          <div class="code-entry-button"><input type="submit" value="Wyslij wiadomosc" /></div>
+          <div><input class="code-entry-field" type="text" value={this.state.codes[0]} onChange={(event) => {this.handleChange(0, event)}} /></div>
+          <div><input class="code-entry-field" type="text" value={this.state.codes[1]} onChange={(event) => {this.handleChange(1, event)}} /></div>
+          <div><input class="code-entry-field" type="text" value={this.state.codes[2]} onChange={(event) => {this.handleChange(2, event)}} /></div>
+          <div><input class="code-entry-button" type="submit" value="Zaszyfruj numer" /></div>
         </form>
       </div>
     );
   }
 }
 
-const TEAM_NONE = -1;
-const TEAM_A = 0;
-const TEAM_B = 1;
+class NumberEntryForm extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {number: ''};
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({number : event.target.value})
+  }
+
+  handleSubmit(event) {
+    log('A number was submitted: ' + this.state.number);
+    event.preventDefault();
+    this.props.socket.emit('game-submit-decodednumber', TEAM_A, this.state.number);
+  }
+
+  render() {
+    return(
+      <div class="code-entry-form">
+        <form onSubmit={this.handleSubmit}>
+          <div><input class="code-entry-field" type="text" value={this.state.number} onChange={this.handleChange} /></div>
+          <div><input class="code-entry-button" type="submit" value="Odszyfruj numer" /></div>
+        </form>
+      </div>
+    );
+  }
+}
 
 
-class App extends Component {
+class CodeButton extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {      
+      display : 'Pokaz numer!',
+      showingNumber : false,
+      lastClick : new Date()
+    };
+  }
+
+  onClick() {
+    var now = new Date();
+    const delta = now - this.state.lastClick;
+
+    if (!this.state.showingNumber && delta < 500) {
+      const newText = this.props.numer;
+      this.setState({lastClick : now, display : newText, showingNumber : true});
+      setTimeout(this.onClick.bind(this), 2000);
+      return;
+    } 
+
+    if (this.state.showingNumber) {
+      this.setState({lastClick : now, showingNumber : false, display : 'Pokaz numer!'});
+      return;
+    }
+
+    this.setState({lastClick : now});
+  }
+
+  render() {
+    return (<button class="game-infobar-button-number" onClick={this.onClick.bind(this)}>{this.state.display}</button>);
+  }
+}
+
+class App extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -219,16 +259,7 @@ class App extends Component {
   }
 
   componentDidMount = () => {
-      const socket = io('http://localhost:3000', {
-        forceNew : true,
-        reconnectionDelay: 1000,
-        reconnection: true,
-        reconnectionAttemps: 10,
-        transports: ['websocket'],
-        agent: false,
-        upgrade: false,
-        rejectUnauthorized: false
-      });
+      const socket = io('http://localhost:3000');
 
     socket.on('disconnect', () => {
         log('Disconnected from the server');
@@ -282,7 +313,7 @@ class App extends Component {
       return false;
     }
 
-    if (this.state.game_state.team == TEAM_NONE) {
+    if (this.state.game_state.team === TEAM_NONE) {
       return false;
     }
 
@@ -290,42 +321,49 @@ class App extends Component {
   }
 
   genGameHeader() {
-    log('Rendering game header');
-
     if (!this.state.connected) {
-      return(<div>Connecting...</div>);
+      return(<div>:( Connecting to the game server...</div>);
     }
 
     if (this.state.game_state == null) {
       return(<div>Refreshing game state...</div>);
     }
 
-    if (this.state.game_state.team == TEAM_NONE) {
+    if (this.state.game_state.team === TEAM_NONE) {
       return(
-        <div>
-          <button onClick={this.joinTeamA}>Join team A</button>
-          <button onClick={this.joinTeamB}>Join team B</button>
+        <div class="game-join-buttons">
+          <button class="game-infobar-button" onClick={this.joinTeamA}>Druzyna A</button>
+          <button class="game-infobar-button" onClick={this.joinTeamB}>Druzyna AA</button>
         </div>
       );
     }
-    let team = "TeamA";
-    if (this.state.game_state.team == TEAM_B) {
-      team = "TeamB";
+    let team = "Druzyna A";
+    if (this.state.game_state.team === TEAM_B) {
+      team = "Druzyna AA";
     }
     
+    let drawnNumber = 0;
+    if (this.state.game_state) {
+      const rounds = this.state.game_state.rounds;
+      const round = rounds[rounds.length - 1];
+      const team = round.teams[TEAM_A];
+      drawnNumber = team.drawn_number;
+    }
+
     return (
     <div class="game-statusbar">
-      <div>{team}</div>
-      <button onClick={this.newGame}>Start new game</button>
-      <button onClick={this.refreshGameState}>Refresh game state</button>
-      <button onClick={this.startRound}>Start the round</button>     
-      <div>Round: {this.state.game_state.round_number + 1}</div>
+      <div class="game-infobar-text">{team}</div>
+      <div class="game-infobar-text">Runda: 0{this.state.game_state.rounds.length}</div>
+      <button class="game-infobar-button" onClick={this.newGame}>Nowa gra</button>
+      <button class="game-infobar-button" onClick={this.refreshGameState}>Refresh</button>
+      <button class="game-infobar-button" onClick={this.startRound}>Nastepna runda</button>
+      <CodeButton numer={drawnNumber}/>
     </div>);
   }
 
   genWordsBar() {
     if (  !this.state.game_state 
-          || this.state.game_state.team == -1){
+          || this.state.game_state.team === TEAM_NONE){
       return (<div></div>);
     }
     const words = this.state.game_state.words[this.state.game_state.team].map((word, index) => {
@@ -334,31 +372,88 @@ class App extends Component {
   return (<div class="game-wordsbar">{words}</div>);
   }
 
-  genBoardState() {
-    return ({
+  digits
 
+  genBoardState() {
+    let i = 0;
+    let words = Array(8);
+    for (i = 0; i < 8; i++) {
+      words[i] = Array(3).fill(['']);
+    }
+
+    let numbers = Array(8);
+    for (i = 0; i < 8; i++) {
+      numbers[i] = Array(3).fill(['']);
+    }
+
+    let guesses = Array(8);
+    for (i = 0; i < 8; i++) {
+      guesses[i] = Array(3).fill(['']);
+    }
+
+    let hints = Array(4);
+    for (i = 0; i < 4; i++) {
+      hints[i] = [];
+    }
+
+    if (this.state.game_state) {
+      const rounds = this.state.game_state.rounds;
+      if (rounds) {
+        for (i = 0; i < rounds.length; i++) {
+          words[i] = rounds[i].teams[TEAM_A].encoded_number.slice();
+         
+          if (rounds[i].teams[TEAM_A].decoded_number) {
+            guesses[i] = (""+rounds[i].teams[TEAM_A].decoded_number).split("");          
+            numbers[i] = (""+rounds[i].teams[TEAM_A].drawn_number).split("");          
+          }
+
+          // if another team posted the guess assign hints to hint buckets
+          if (rounds[i].teams[TEAM_A].decoded_number) {
+            var hintBuckets = (""+rounds[i].teams[TEAM_A].drawn_number).split("");          
+            log(hintBuckets);
+            for (var j = 0; j < 3; j++) {
+              hints[hintBuckets[j] - 1].push(rounds[i].teams[TEAM_A].encoded_number[j]);
+            }            
+            
+          }
+
+        }
+      }
+    }
+
+    return ({
+      words : words,
+      numbers : numbers,
+      guesses : guesses,
+      hints : hints
     });
   }
 
   render() {
     log('Rendering app');
-
+    
     const gameHeader = this.genGameHeader();
     const wordsBar = this.genWordsBar();
     const boardState = this.genBoardState();
-
+    
     if (this.showGameBoard()) {
       return (
         <div class="game-main">
+          <div class="game-titlebar"><h1>S Z Y F R A N T</h1></div>
           {gameHeader}
           {wordsBar}
           <GameBoard board_state={boardState}/>
-          <CodeEntryForm socket={this.state.socket}/>
+          <HintsBoard board_state={boardState}/>
+          <div class="game-inputbar">
+            <CodeEntryForm socket={this.state.socket}/>
+            <NumberEntryForm socket={this.state.socket}/>
+          </div>
         </div>
       );
     } else {
       return (
         <div class="game-main">
+          <div class="game-titlebar"><h1>S Z Y F R A N T</h1></div>
           {gameHeader}
         </div>);
     }
