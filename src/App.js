@@ -103,28 +103,32 @@ class GameBoard extends React.Component {
   
   render() {
     return (    
-      <div class="game-board-with-keys">
-        <div class="game-board">
-          <div class="board-column">
-            {this.generateRoundCard(0)}
-            {this.generateRoundCard(1)}
-            {this.generateRoundCard(2)}
-            {this.generateRoundCard(3)}
-          </div>
-          <div class="board-column">
-            {this.generateRoundCard(4)}
-            {this.generateRoundCard(5)}
-            {this.generateRoundCard(6)}
-            {this.generateRoundCard(7)}
-          </div>
+      <div class="game-board">
+        <div class="board-column">
+          {this.generateRoundCard(0)}
+          {this.generateRoundCard(1)}
+          {this.generateRoundCard(2)}
+          {this.generateRoundCard(3)}
         </div>
+        <div class="board-column">
+          {this.generateRoundCard(4)}
+          {this.generateRoundCard(5)}
+          {this.generateRoundCard(6)}
+          {this.generateRoundCard(7)}
+        </div>
+      </div>
+    );
+  }
+}
 
-        <div class="game-board-hints-row">
-          <GameBoardKyes name="Key 1" hints={this.props.board_state.hints[0]}/>
-          <GameBoardKyes name="Key 2" hints={this.props.board_state.hints[1]}/>
-          <GameBoardKyes name="Key 3" hints={this.props.board_state.hints[2]}/>
-          <GameBoardKyes name="Key 4" hints={this.props.board_state.hints[3]}/>
-        </div>
+class HintsBoard extends React.Component {
+  render() {
+    return(
+      <div class="game-board-hints">
+        <GameBoardKyes name="Key #1" hints={this.props.board_state.hints[0]}/>
+        <GameBoardKyes name="Key #2" hints={this.props.board_state.hints[1]}/>
+        <GameBoardKyes name="Key #3" hints={this.props.board_state.hints[2]}/>
+        <GameBoardKyes name="Key #4" hints={this.props.board_state.hints[3]}/>
       </div>
     );
   }
@@ -448,6 +452,7 @@ class App extends React.Component {
           {gameHeader}
           {wordsBar}
           <GameBoard board_state={boardState}/>
+          <HintsBoard board_state={boardState}/>
           <div class="game-inputbar">
             <CodeEntryForm socket={this.state.socket}/>
             <NumberEntryForm socket={this.state.socket}/>

@@ -1,13 +1,15 @@
 body {
+  background:#eeeedd;
   font: Courier New,monospace;
 }
 
 .game-main {
   background:#eeeedd;
   width: 640px;
-  height: 950px;
+  height: 1024px;
   margin: 0 auto;
   padding: 10px;
+  border: solid;
 }
 
 .game-titlebar {
@@ -51,7 +53,7 @@ body {
 .game-wordsbar {
   background:#eeeedd;
   width: 640px;
-  height: 60px;
+  height: 70px;
   display: flex;
   justify-content: space-between;
 }
@@ -63,7 +65,7 @@ body {
   justify-content: center;
   font-size: 20px;
   font-weight: bold;
-  padding : 4px;
+  padding : 5px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -71,7 +73,7 @@ body {
 }
 
 .game-board {
-  background:#77dd77; 
+  background:#eeeedd;
   width: 630px;
   height: 480px;
   padding: 5px;
@@ -80,30 +82,31 @@ body {
   margin: 0px auto;
   display: grid;  
 }
+
 .game-card {
   width: 300px;
   height: 110px;
   padding: 5px;
-	background:#eeeeee;
+  background:#eeeedd;
   display: grid;
   justify-content: center;
 }
 
 .game-card-header {
-	background:#b49797;
+	background:#bdc8ce;
   display: flex;
   font-weight: bold;
   padding: 1px;
 }
 
 .game-card-row {
-  background:#bbbbbb;
+  background:#cccccc;
   padding: 1px;
   display: flex;
 }
 
 .game-card-row-light {
-  background:#aaaaaa;
+  background:#bbbbbb;
   padding: 1px;
   display: flex;
 }
@@ -128,25 +131,19 @@ body {
   width: 20px;
 }
 
-
-
-.game-board-with-keys {
-  background:#7777dd; 
-  width: 640px;
-  height: 680px;
-  grid-template-rows: 4fr 2fr; 
-  margin: 0px auto;
-  display: grid;
-}
-
-.game-board-hints-row {
+.game-board-hints {
+  width: 630px;
   display: flex;
   justify-content: center;
+  display: flex;
+  justify-content: space-between;  
+  padding : 5px;
 }
 
 .game-board-keys {
-  background:#aaaaaa; 
-  width: 150px;
+  background:#bbbbbb; 
+  width: 140px;
+  padding: 5px;
   height: 200px;
   grid-template-columns: 1fr; 
   display: flex;
@@ -155,20 +152,32 @@ body {
 }
 
 .game-board-keys-header {
-  background:#aaaaaa;
-  height: 20px;
+  background:#bdc8ce;
+  height: 24px;
+  padding : 5px;
+  font-weight: bold;
 }
 
 .game-board-keys-hint {
-  background:#eeeeee;
-  height: 20px;
+  background:#cccccc;
+  height: 24px;
 }
 
 .game-inputbar {
-  background:#ff0000; 
-  width: 640px;
-  height: 100px;
+  width: 630px;
+  padding : 5px;
   display: flex;
   text-align: center;
+  justify-content: center;
+  align-items: center;
+  white-space:nowrap;  
 }
 
+.code-entry-form {
+  padding : 5px;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  white-space:nowrap;  
+}
