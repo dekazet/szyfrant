@@ -1,6 +1,7 @@
-body {
+body {  
   background:#eeeedd;
   font: Courier New,monospace;
+  font-size: 18x;
 }
 
 .game-main {
@@ -8,6 +9,7 @@ body {
   width: 640px;
   height: 1024px;
   margin: 0 auto;
+  margin-top: 30px;
   padding: 10px;
   border: solid;
 }
@@ -19,7 +21,7 @@ body {
 
 .game-join-buttons {
   margin: 0 auto;
-  text-align: center;
+  text-align: center;  
 }
 
 .game-infobar-button {
@@ -28,6 +30,15 @@ body {
   padding-top: 1px;
   padding-bottom: 1px;
 }
+
+.game-infobar-button-number {
+  font-size: 18px;
+  padding : 4px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  width: 128px;
+}
+
 
 .game-infobar-text {
   font-size: 18px;
@@ -97,18 +108,21 @@ body {
   display: flex;
   font-weight: bold;
   padding: 1px;
+  font-size: 18px;
 }
 
 .game-card-row {
   background:#cccccc;
   padding: 1px;
   display: flex;
+  font-size: 18px;
 }
 
 .game-card-row-light {
   background:#bbbbbb;
   padding: 1px;
   display: flex;
+  font-size: 18px;
 }
 
 .game-card-word {
@@ -154,6 +168,7 @@ body {
 .game-board-keys-header {
   background:#bdc8ce;
   height: 24px;
+  font-size: 18px;
   padding : 5px;
   font-weight: bold;
 }
@@ -161,6 +176,7 @@ body {
 .game-board-keys-hint {
   background:#cccccc;
   height: 24px;
+  font-size: 18px;
 }
 
 .game-inputbar {
@@ -180,4 +196,16 @@ body {
   justify-content: center;
   align-items: center;
   white-space:nowrap;  
+}
+
+.code-entry-field
+{
+  font-size: 16px;
+}
+
+.code-entry-button {
+  font-size: 16px;
+  padding : 4px;
+  padding-top: 1px;
+  padding-bottom: 1px;
 }

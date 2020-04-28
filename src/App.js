@@ -125,10 +125,10 @@ class HintsBoard extends React.Component {
   render() {
     return(
       <div class="game-board-hints">
-        <GameBoardKyes name="Key #1" hints={this.props.board_state.hints[0]}/>
-        <GameBoardKyes name="Key #2" hints={this.props.board_state.hints[1]}/>
-        <GameBoardKyes name="Key #3" hints={this.props.board_state.hints[2]}/>
-        <GameBoardKyes name="Key #4" hints={this.props.board_state.hints[3]}/>
+        <GameBoardKyes name="Klucz #1" hints={this.props.board_state.hints[0]}/>
+        <GameBoardKyes name="Klucz #2" hints={this.props.board_state.hints[1]}/>
+        <GameBoardKyes name="Klucz #3" hints={this.props.board_state.hints[2]}/>
+        <GameBoardKyes name="Klucz #4" hints={this.props.board_state.hints[3]}/>
       </div>
     );
   }
@@ -165,10 +165,10 @@ class CodeEntryForm extends React.Component {
     return(
       <div class="code-entry-form">
         <form onSubmit={this.handleSubmit}>
-          <div class="code-entry-field"><input type="text" value={this.state.codes[0]} onChange={(event) => {this.handleChange(0, event)}} /></div>
-          <div class="code-entry-field"><input type="text" value={this.state.codes[1]} onChange={(event) => {this.handleChange(1, event)}} /></div>
-          <div class="code-entry-field"><input type="text" value={this.state.codes[2]} onChange={(event) => {this.handleChange(2, event)}} /></div>
-          <div class="code-entry-button"><input type="submit" value="Zaszyfruj numer" /></div>
+          <div><input class="code-entry-field" type="text" value={this.state.codes[0]} onChange={(event) => {this.handleChange(0, event)}} /></div>
+          <div><input class="code-entry-field" type="text" value={this.state.codes[1]} onChange={(event) => {this.handleChange(1, event)}} /></div>
+          <div><input class="code-entry-field" type="text" value={this.state.codes[2]} onChange={(event) => {this.handleChange(2, event)}} /></div>
+          <div><input class="code-entry-button" type="submit" value="Zaszyfruj numer" /></div>
         </form>
       </div>
     );
@@ -199,8 +199,8 @@ class NumberEntryForm extends React.Component {
     return(
       <div class="code-entry-form">
         <form onSubmit={this.handleSubmit}>
-          <div class="code-entry-field"><input type="text" value={this.state.number} onChange={this.handleChange} /></div>
-          <div class="code-entry-button"><input type="submit" value="Odszyfruj numer" /></div>
+          <div><input class="code-entry-field" type="text" value={this.state.number} onChange={this.handleChange} /></div>
+          <div><input class="code-entry-button" type="submit" value="Odszyfruj numer" /></div>
         </form>
       </div>
     );
@@ -238,7 +238,7 @@ class CodeButton extends React.Component {
   }
 
   render() {
-    return (<button class="game-infobar-button" onClick={this.onClick.bind(this)}>{this.state.display}</button>);
+    return (<button class="game-infobar-button-number" onClick={this.onClick.bind(this)}>{this.state.display}</button>);
   }
 }
 
@@ -331,7 +331,7 @@ class App extends React.Component {
 
   genGameHeader() {
     if (!this.state.connected) {
-      return(<div>Connecting to the game server...</div>);
+      return(<div>:( Connecting to the game server...</div>);
     }
 
     if (this.state.game_state == null) {
@@ -341,14 +341,14 @@ class App extends React.Component {
     if (this.state.game_state.team === TEAM_NONE) {
       return(
         <div class="game-join-buttons">
-          <button class="game-infobar-button" onClick={this.joinTeamA}>Join team A</button>
-          <button class="game-infobar-button" onClick={this.joinTeamB}>Join team B</button>
+          <button class="game-infobar-button" onClick={this.joinTeamA}>Druzyna A</button>
+          <button class="game-infobar-button" onClick={this.joinTeamB}>Druzyna AA</button>
         </div>
       );
     }
-    let team = "TeamA";
+    let team = "Druzyna A";
     if (this.state.game_state.team === TEAM_B) {
-      team = "TeamB";
+      team = "Druzyna AA";
     }
     
     let drawnNumber = 0;
@@ -362,10 +362,10 @@ class App extends React.Component {
     return (
     <div class="game-statusbar">
       <div class="game-infobar-text">{team}</div>
+      <div class="game-infobar-text">Runda: 0{this.state.game_state.rounds.length}</div>
       <button class="game-infobar-button" onClick={this.newGame}>Nowa gra</button>
       <button class="game-infobar-button" onClick={this.refreshGameState}>Refresh</button>
       <button class="game-infobar-button" onClick={this.startRound}>Nastepna runda</button>
-      <div class="game-infobar-text">Runda: 0{this.state.game_state.rounds.length}</div>
       <CodeButton numer={drawnNumber}/>
     </div>);
   }
