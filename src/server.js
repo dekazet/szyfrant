@@ -27,24 +27,55 @@ function log(str) {
   console.log(timeStamp() + ' ' + str);
 }
 
+const TEAM_NONE = -1;
+const TEAM_A = 0;
+const TEAM_B = 1;
+
 state = szyfrant.newGame();
 team_a = new Set();
 team_b = new Set();
 
 function teamFromClient(id) {
   if (team_a.has(id)) {
-    return 0;
+    log("Mapped client: " + id + " to Team A");
+    return TEAM_A;
   }
   if (team_b.has(id)) {
-    return 1;
+    log("Mapped client: " + id + " to Team B");
+    return TEAM_B;
   }
-  return -1;
+  log("Mapped client: " + id + " to Team None");
+  return TEAM_NONE;
 }
 
 function sendState(socket) {
-  let game_state = Object.assign({}, state, {team : teamFromClient(socket.id)});  
-  socket.emit('game-state', game_state );
-  log('Sending state to client ' + socket.id);
+
+  let seenCaller = false;
+
+  team_a.forEach((socketId) => {
+    let game_state = Object.assign({}, state, {team : teamFromClient(socketId)});
+    log('Sending state to client ' + socketId + " [Team A]");
+    io.to(socketId).emit('game-state', game_state );
+    if (socketId == socket.id) {
+      seenCaller = true;
+    }
+  });
+
+
+  team_a.forEach((socketId) => {
+    let game_state = Object.assign({}, state, {team : teamFromClient(socketId)});
+    log('Sending state to client ' + socketId + " [Team B]");
+    io.to(socketId).emit('game-state', game_state );
+    if (socketId == socket.id) {
+      seenCaller = true;
+    }
+  });
+
+  if (!seenCaller) {
+    let game_state = Object.assign({}, state, {team : teamFromClient(socket.id)});
+    log('Sending state to client ' + socket.id + " [Team None?]");
+    socket.emit('game-state', game_state );    
+  }
   //szyfrant.printGame(game_state);
 }
 
@@ -57,14 +88,14 @@ io.on('connection', (socket) => {
     });
 
     socket.on('game-join-a', () => { 
-      log('team-join-a from' + socket.id);
+      log('team-join-a from ' + socket.id);
       team_a.add(socket.id);
       team_b.delete(socket.id);
       sendState(socket);
     });
 
     socket.on('game-join-b', () => { 
-      log('team-join-b from' + socket.id);
+      log('team-join-b from ' + socket.id);
       team_a.delete(socket.id);
       team_b.add(socket.id);
       sendState(socket);

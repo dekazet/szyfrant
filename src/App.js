@@ -393,23 +393,32 @@ class App extends React.Component {
       hints[i] = [];
     }
 
-    if (this.state.game_state) {
+
+
+    if (this.state.game_state && this.state.game_state.team !== TEAM_NONE) {
+
+      const ourTeam = this.state.game_state.team;
+      let otherTeam = TEAM_B;
+      if (ourTeam == TEAM_B) {
+        otherTeam = TEAM_A;
+      }
+      
       const rounds = this.state.game_state.rounds;
       if (rounds) {
         for (i = 0; i < rounds.length; i++) {
-          words[i] = rounds[i].teams[TEAM_A].encoded_number.slice();
+          words[i] = rounds[i].teams[ourTeam].encoded_number.slice();
          
-          if (rounds[i].teams[TEAM_A].decoded_number) {
-            guesses[i] = (""+rounds[i].teams[TEAM_A].decoded_number).split("");          
-            numbers[i] = (""+rounds[i].teams[TEAM_A].drawn_number).split("");          
+          if (rounds[i].teams[ourTeam].decoded_number) {
+            guesses[i] = (""+rounds[i].teams[ourTeam].decoded_number).split("");          
+            numbers[i] = (""+rounds[i].teams[ourTeam].drawn_number).split("");          
           }
 
           // if another team posted the guess assign hints to hint buckets
-          if (rounds[i].teams[TEAM_A].decoded_number) {
-            var hintBuckets = (""+rounds[i].teams[TEAM_A].drawn_number).split("");          
+          if (rounds[i].teams[otherTeam].decoded_number) {
+            var hintBuckets = (""+rounds[i].teams[otherTeam].drawn_number).split("");          
             log(hintBuckets);
             for (var j = 0; j < 3; j++) {
-              hints[hintBuckets[j] - 1].push(rounds[i].teams[TEAM_A].encoded_number[j]);
+              hints[hintBuckets[j] - 1].push(rounds[i].teams[otherTeam].encoded_number[j]);
             }            
             
           }
