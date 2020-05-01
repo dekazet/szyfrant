@@ -56,16 +56,18 @@ function sendState(socket) {
     let game_state = Object.assign({}, state, {team : teamFromClient(socketId)});
     log('Sending state to client ' + socketId + " [Team A]");
     io.to(socketId).emit('game-state', game_state );
+    szyfrant.printGame(game_state);
     if (socketId == socket.id) {
       seenCaller = true;
     }
   });
 
 
-  team_a.forEach((socketId) => {
+  team_b.forEach((socketId) => {
     let game_state = Object.assign({}, state, {team : teamFromClient(socketId)});
     log('Sending state to client ' + socketId + " [Team B]");
     io.to(socketId).emit('game-state', game_state );
+    szyfrant.printGame(game_state);
     if (socketId == socket.id) {
       seenCaller = true;
     }
@@ -73,10 +75,10 @@ function sendState(socket) {
 
   if (!seenCaller) {
     let game_state = Object.assign({}, state, {team : teamFromClient(socket.id)});
-    log('Sending state to client ' + socket.id + " [Team None?]");
+    log('Sending state to client  ' + socket.id + " [Team None?]");
     socket.emit('game-state', game_state );    
+    szyfrant.printGame(game_state);
   }
-  //szyfrant.printGame(game_state);
 }
 
 io.on('connection', (socket) => {
@@ -113,16 +115,26 @@ io.on('connection', (socket) => {
       sendState(socket);
     });
 
-    socket.on('game-submit-codednumber', (team, codedNumber) => { 
-      log('game-submit-codednumber from ' + socket.id); 
-      state = szyfrant.submitCoded(state, team, codedNumber); 
-      sendState(socket);
+    socket.on('game-submit-codednumber', (codedNumber) => { 
+      log('game-submit-codednumber from ' + socket.id);
+      const team = teamFromClient(socket.id);
+      if (team == TEAM_NONE) {
+        log('Unable to map client to a team');
+      } else {
+        state = szyfrant.submitCoded(state, team, codedNumber); 
+        sendState(socket);
+      }
     });
 
-    socket.on('game-submit-decodednumber', (team, number) => { 
+    socket.on('game-submit-decodednumber', (number) => { 
       log('game-submit-decodednumber from ' + socket.id); 
-      state = szyfrant.submitDecoded(state, team, number); 
-      sendState(socket);
+      const team = teamFromClient(socket.id);
+      if (team == TEAM_NONE) {
+        log('Unable to map client to a team');  
+      } else {
+        state = szyfrant.submitDecoded(state, team, number); 
+        sendState(socket);
+      }
     });
     
     socket.on('disconnect', () => {

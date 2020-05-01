@@ -158,7 +158,7 @@ class CodeEntryForm extends React.Component {
   handleSubmit(event) {
     log('A code was submitted: ' + this.state.codes);
     event.preventDefault();
-    this.props.socket.emit('game-submit-codednumber', TEAM_A, this.state.codes);
+    this.props.socket.emit('game-submit-codednumber', this.state.codes);
   }
 
   render() {
@@ -192,7 +192,7 @@ class NumberEntryForm extends React.Component {
   handleSubmit(event) {
     log('A number was submitted: ' + this.state.number);
     event.preventDefault();
-    this.props.socket.emit('game-submit-decodednumber', TEAM_A, this.state.number);
+    this.props.socket.emit('game-submit-decodednumber', this.state.number);
   }
 
   render() {
@@ -343,7 +343,7 @@ class App extends React.Component {
     if (this.state.game_state) {
       const rounds = this.state.game_state.rounds;
       const round = rounds[rounds.length - 1];
-      const team = round.teams[TEAM_A];
+      const team = round.teams[this.state.game_state.team];
       drawnNumber = team.drawn_number;
     }
 
