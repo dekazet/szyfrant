@@ -6,10 +6,9 @@ body {
 .game-main {
   background:#eeeedd;
   width: 640px;
-  height: 1024px;
   margin: 0 auto;
-  margin-top: 30px;
-  padding: 10px;
+  margin-top: 2px;
+  padding: 2px;
   border: solid;
 }
 
@@ -24,24 +23,15 @@ body {
 }
 
 .game-infobar-button {
-  font-size: 18px;
-  padding : 4px;
+  font-size: 16px;
+  padding : 2px;
   padding-top: 1px;
   padding-bottom: 1px;
 }
-
-.game-infobar-button-number {
-  font-size: 18px;
-  padding : 4px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  width: 128px;
-}
-
 
 .game-infobar-text {
-  font-size: 18px;
-  padding : 4px;
+  font-size: 16px;
+  padding : 2px;
   padding-top: 1px;
   padding-bottom: 1px;
   display: flex;
@@ -51,52 +41,48 @@ body {
 
 .game-statusbar {
   background:#dddddd; 
-  width: 630px;
-  height: 40px;
-  margin: 0px auto;
   display: flex;
   font-weight: bold;
   text-align: center;
-  padding: 5px;
+  padding: 2px;
 }
 
 .game-wordsbar {
   background:#eeeedd;
-  width: 640px;
-  height: 70px;
   display: flex;
   justify-content: space-between;
 }
 
 .game-wordsbar-word {
   background:#eeeedd;
-  width: 140px;
-  height: 60px;
   justify-content: center;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
-  padding : 5px;
+  padding : 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  white-space:nowrap;
+  white-space: nowrap;
 }
 
 .game-board {
   background:#eeeedd;
-  width: 630px;
-  height: 480px;
   padding: 5px;
-  grid-template-columns: 1fr 1fr; 
+  grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr; 
-  margin: 0px auto;
-  display: grid;  
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+.game-board-row {
+  display: flex;
+  padding: 5px;
+  justify-content: center;
+  align-items: center;
 }
 
 .game-card {
-  width: 300px;
-  height: 110px;
-  padding: 5px;
+  padding: 2px;
   background:#eeeedd;
   display: grid;
   justify-content: center;
@@ -107,21 +93,21 @@ body {
   display: flex;
   font-weight: bold;
   padding: 1px;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .game-card-row {
   background:#cccccc;
   padding: 1px;
   display: flex;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .game-card-row-light {
   background:#bbbbbb;
   padding: 1px;
   display: flex;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .game-card-word {
@@ -129,17 +115,7 @@ body {
   padding: 1px;
 }
 
-.game-card-round {
-  padding: 1px;
-  width: 200px;
-}
-
-.game-card-guess {
-  padding: 1px;
-  width: 20px;
-}
-
-.game-card-number {
+.game-card-box {
   padding: 1px;
   width: 20px;
 }
@@ -150,14 +126,13 @@ body {
   justify-content: center;
   display: flex;
   justify-content: space-between;  
-  padding : 5px;
+  padding : 2px;
 }
 
 .game-board-keys {
   background:#bbbbbb; 
   width: 140px;
-  padding: 5px;
-  height: 200px;
+  padding: 2px;
   grid-template-columns: 1fr; 
   display: flex;
   flex-direction: column;
@@ -168,7 +143,7 @@ body {
   background:#c8c4a5;
   height: 24px;
   font-size: 18px;
-  padding : 5px;
+  padding : 2px;
   font-weight: bold;
 }
 
@@ -180,7 +155,7 @@ body {
 
 .game-inputbar {
   width: 630px;
-  padding : 5px;
+  padding : 2px;
   display: flex;
   text-align: center;
   justify-content: center;
@@ -189,7 +164,7 @@ body {
 }
 
 .code-entry-form {
-  padding : 5px;
+  padding : 2px;
   display: flex;
   text-align: center;
   justify-content: center;

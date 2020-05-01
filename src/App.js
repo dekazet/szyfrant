@@ -34,8 +34,8 @@ class RoundCardRow extends React.Component {
     return (
       <div class="game-card-row">
       <div class='game-card-word'>{this.props.word}</div>
-        <div class='game-card-guess'>{this.props.guess}</div>
-        <div class='game-card-number'>{this.props.number}</div>   
+        <div class='game-card-box'>{this.props.guess}</div>
+        <div class='game-card-box'>{this.props.number}</div>   
       </div>
     );
   }
@@ -46,8 +46,8 @@ class RoundCardRowLight extends React.Component {
     return (
       <div class="game-card-row-light">
       <div class='game-card-word'>{this.props.word}</div>
-        <div class='game-card-guess'>{this.props.guess}</div>
-        <div class='game-card-number'>{this.props.number}</div>   
+        <div class='game-card-box'>{this.props.guess}</div>
+        <div class='game-card-box'>{this.props.number}</div>   
       </div>
     );
   }
@@ -58,9 +58,9 @@ class RoundCardHeaderRow extends React.Component {
     const floppy = '\u25a0';
     return (
       <div class="game-card-header">
-        <div class='game-card-round'>Runda 0{this.props.roundNumber}</div>
-        <div class='game-card-guess'>?</div>
-        <div class='game-card-number'>{floppy}</div>   
+        <div class='game-card-word'>Runda 0{this.props.roundNumber}</div>
+        <div class='game-card-box'>?</div>
+        <div class='game-card-box'>{floppy}</div>   
       </div>
     );
   }
@@ -104,15 +104,19 @@ class GameBoard extends React.Component {
   render() {
     return (    
       <div class="game-board">
-        <div class="board-column">
+        <div class="game-board-row">
           {this.generateRoundCard(0)}
           {this.generateRoundCard(1)}
+          </div>
+        <div class="game-board-row">
           {this.generateRoundCard(2)}
           {this.generateRoundCard(3)}
         </div>
-        <div class="board-column">
+        <div class="game-board-row">
           {this.generateRoundCard(4)}
           {this.generateRoundCard(5)}
+          </div>
+        <div class="game-board-row">
           {this.generateRoundCard(6)}
           {this.generateRoundCard(7)}
         </div>
@@ -238,7 +242,7 @@ class CodeButton extends React.Component {
   }
 
   render() {
-    return (<button class="game-infobar-button-number" onClick={this.onClick.bind(this)}>{this.state.display}</button>);
+    return (<button class="game-infobar-button" onClick={this.onClick.bind(this)}>{this.state.display}</button>);
   }
 }
 
@@ -329,14 +333,14 @@ class App extends React.Component {
     if (this.state.game_state.team === TEAM_NONE) {
       return(
         <div class="game-join-buttons">
-          <button class="game-infobar-button" onClick={this.joinTeamA}>Druzyna A</button>
-          <button class="game-infobar-button" onClick={this.joinTeamB}>Druzyna AA</button>
+          <button class="game-infobar-button" onClick={this.joinTeamA}>Druzyna: A</button>
+          <button class="game-infobar-button" onClick={this.joinTeamB}>Druzyna: AA</button>
         </div>
       );
     }
-    let team = "Druzyna A";
+    let team = "Druzyna: A";
     if (this.state.game_state.team === TEAM_B) {
-      team = "Druzyna AA";
+      team = "Druzyna: AA";
     }
     
     let drawnNumber = 0;
@@ -352,7 +356,6 @@ class App extends React.Component {
       <div class="game-infobar-text">{team}</div>
       <div class="game-infobar-text">Runda: 0{this.state.game_state.rounds.length}</div>
       <button class="game-infobar-button" onClick={this.newGame}>Nowa gra</button>
-      <button class="game-infobar-button" onClick={this.refreshGameState}>Refresh</button>
       <button class="game-infobar-button" onClick={this.startRound}>Nastepna runda</button>
       <CodeButton numer={drawnNumber}/>
     </div>);
@@ -375,17 +378,17 @@ class App extends React.Component {
     let i = 0;
     let words = Array(8);
     for (i = 0; i < 8; i++) {
-      words[i] = Array(3).fill(['']);
+      words[i] = Array(3).fill([' ']);
     }
 
     let numbers = Array(8);
     for (i = 0; i < 8; i++) {
-      numbers[i] = Array(3).fill(['']);
+      numbers[i] = Array(3).fill([' ']);
     }
 
     let guesses = Array(8);
     for (i = 0; i < 8; i++) {
-      guesses[i] = Array(3).fill(['']);
+      guesses[i] = Array(3).fill([' ']);
     }
 
     let hints = Array(4);
@@ -393,13 +396,11 @@ class App extends React.Component {
       hints[i] = [];
     }
 
-
-
     if (this.state.game_state && this.state.game_state.team !== TEAM_NONE) {
 
       const ourTeam = this.state.game_state.team;
       let otherTeam = TEAM_B;
-      if (ourTeam == TEAM_B) {
+      if (ourTeam === TEAM_B) {
         otherTeam = TEAM_A;
       }
       
@@ -445,7 +446,7 @@ class App extends React.Component {
     if (this.showGameBoard()) {
       return (
         <div class="game-main">
-          <div class="game-titlebar"><h1>S Z Y F R A N T</h1></div>
+          <div class="game-titlebar"><h2>S Z Y F R A N T</h2></div>
           {gameHeader}
           {wordsBar}
           <GameBoard board_state={boardState}/>
@@ -459,7 +460,7 @@ class App extends React.Component {
     } else {
       return (
         <div class="game-main">
-          <div class="game-titlebar"><h1>S Z Y F R A N T</h1></div>
+          <div class="game-titlebar"><h2>S Z Y F R A N T</h2></div>
           {gameHeader}
         </div>);
     }
