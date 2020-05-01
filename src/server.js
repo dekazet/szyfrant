@@ -56,7 +56,7 @@ function sendState(socket) {
     let game_state = Object.assign({}, state, {team : teamFromClient(socketId)});
     log('Sending state to client ' + socketId + " [Team A]");
     io.to(socketId).emit('game-state', game_state );
-    szyfrant.printGame(game_state);
+    //szyfrant.printGame(game_state);
     if (socketId == socket.id) {
       seenCaller = true;
     }
@@ -67,7 +67,7 @@ function sendState(socket) {
     let game_state = Object.assign({}, state, {team : teamFromClient(socketId)});
     log('Sending state to client ' + socketId + " [Team B]");
     io.to(socketId).emit('game-state', game_state );
-    szyfrant.printGame(game_state);
+    //szyfrant.printGame(game_state);
     if (socketId == socket.id) {
       seenCaller = true;
     }
@@ -77,7 +77,7 @@ function sendState(socket) {
     let game_state = Object.assign({}, state, {team : teamFromClient(socket.id)});
     log('Sending state to client  ' + socket.id + " [Team None?]");
     socket.emit('game-state', game_state );    
-    szyfrant.printGame(game_state);
+    //szyfrant.printGame(game_state);
   }
 }
 
