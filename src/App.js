@@ -129,10 +129,10 @@ class HintsBoard extends React.Component {
   render() {
     return(
       <div class="game-board-hints">
-        <GameBoardKyes name="Klucz #1" hints={this.props.board_state.hints[0]}/>
-        <GameBoardKyes name="Klucz #2" hints={this.props.board_state.hints[1]}/>
-        <GameBoardKyes name="Klucz #3" hints={this.props.board_state.hints[2]}/>
-        <GameBoardKyes name="Klucz #4" hints={this.props.board_state.hints[3]}/>
+        <GameBoardKyes name="Klucz #1" hints={this.props.hints[0]}/>
+        <GameBoardKyes name="Klucz #2" hints={this.props.hints[1]}/>
+        <GameBoardKyes name="Klucz #3" hints={this.props.hints[2]}/>
+        <GameBoardKyes name="Klucz #4" hints={this.props.hints[3]}/>
       </div>
     );
   }
@@ -265,7 +265,8 @@ class App extends React.Component {
   }
 
   componentDidMount = () => {
-      const socket = io('http://szyfrant.kozlowscy.us:666');
+    //const socket = io('http://szyfrant.kozlowscy.us:666');
+    const socket = io('http://localhost:3000');
 
     socket.on('disconnect', () => {
         log('Disconnected from the server');
@@ -398,6 +399,11 @@ class App extends React.Component {
       hints[i] = [];
     }
 
+    let our_hints = Array(4);
+    for (i = 0; i < 4; i++) {
+      our_hints[i] = [];
+    }
+
     if (this.state.game_state && this.state.game_state.team !== TEAM_NONE) {
 
       const ourTeam = this.state.game_state.team;
@@ -416,16 +422,25 @@ class App extends React.Component {
             numbers[i] = (""+rounds[i].teams[ourTeam].drawn_number).split("");          
           }
 
+          var j;
+
           // if another team posted the guess assign hints to hint buckets
           if (rounds[i].teams[otherTeam].decoded_number) {
-            var hintBuckets = (""+rounds[i].teams[otherTeam].drawn_number).split("");          
+            const hintBuckets = (""+rounds[i].teams[otherTeam].drawn_number).split("");          
             log(hintBuckets);
-            for (var j = 0; j < 3; j++) {
+            for (j = 0; j < 3; j++) {
               hints[hintBuckets[j] - 1].push(rounds[i].teams[otherTeam].encoded_number[j]);
             }            
             
+          // if our team posted the guess assign hints to hint buckets
+          if (rounds[i].teams[ourTeam].decoded_number) {
+            const hintBuckets = (""+rounds[i].teams[ourTeam].drawn_number).split("");          
+            log(hintBuckets);
+            for (j = 0; j < 3; j++) {
+              our_hints[hintBuckets[j] - 1].push(rounds[i].teams[ourTeam].encoded_number[j]);
+            }            
           }
-
+        }
         }
       }
     }
@@ -434,7 +449,8 @@ class App extends React.Component {
       words : words,
       numbers : numbers,
       guesses : guesses,
-      hints : hints
+      hints : hints,
+      our_hints : our_hints
     });
   }
 
@@ -451,8 +467,9 @@ class App extends React.Component {
           <div class="game-titlebar"><h2>S Z Y F R A N T</h2></div>
           {gameHeader}
           {wordsBar}
+          <HintsBoard hints={boardState.our_hints}/>
           <GameBoard board_state={boardState}/>
-          <HintsBoard board_state={boardState}/>
+          <HintsBoard hints={boardState.hints}/>
           <div class="game-inputbar">
             <CodeEntryForm socket={this.state.socket}/>
             <NumberEntryForm socket={this.state.socket}/>
