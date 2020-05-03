@@ -163,6 +163,7 @@ class CodeEntryForm extends React.Component {
     log('A code was submitted: ' + this.state.codes);
     event.preventDefault();
     this.props.socket.emit('game-submit-codednumber', this.state.codes);
+    this.setState({codes : ['', '', '']});
   }
 
   render() {
@@ -197,6 +198,7 @@ class NumberEntryForm extends React.Component {
     log('A number was submitted: ' + this.state.number);
     event.preventDefault();
     this.props.socket.emit('game-submit-decodednumber', this.state.number);
+    this.setState({number : ''});
   }
 
   render() {
