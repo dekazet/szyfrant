@@ -420,6 +420,12 @@ class App extends React.Component {
           if (rounds[i].teams[ourTeam].decoded_number) {
             guesses[i] = (""+rounds[i].teams[ourTeam].decoded_number).split("");          
             numbers[i] = (""+rounds[i].teams[ourTeam].drawn_number).split("");          
+
+            const hintBuckets = (""+rounds[i].teams[ourTeam].drawn_number).split("");          
+            log(hintBuckets);
+            for (j = 0; j < 3; j++) {
+              our_hints[hintBuckets[j] - 1].push(rounds[i].teams[ourTeam].encoded_number[j]);
+            }               
           }
 
           var j;
@@ -431,15 +437,6 @@ class App extends React.Component {
             for (j = 0; j < 3; j++) {
               hints[hintBuckets[j] - 1].push(rounds[i].teams[otherTeam].encoded_number[j]);
             }            
-            
-          // if our team posted the guess assign hints to hint buckets
-          if (rounds[i].teams[ourTeam].decoded_number) {
-            const hintBuckets = (""+rounds[i].teams[ourTeam].drawn_number).split("");          
-            log(hintBuckets);
-            for (j = 0; j < 3; j++) {
-              our_hints[hintBuckets[j] - 1].push(rounds[i].teams[ourTeam].encoded_number[j]);
-            }            
-          }
         }
         }
       }
