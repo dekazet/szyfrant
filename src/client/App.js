@@ -416,7 +416,9 @@ class App extends React.Component {
       if (rounds) {
         for (i = 0; i < rounds.length; i++) {
           words[i] = rounds[i].teams[ourTeam].encoded_number.slice();
-         
+
+          var j;
+          
           if (rounds[i].teams[ourTeam].decoded_number) {
             guesses[i] = (""+rounds[i].teams[ourTeam].decoded_number).split("");          
             numbers[i] = (""+rounds[i].teams[ourTeam].drawn_number).split("");          
@@ -427,8 +429,6 @@ class App extends React.Component {
               our_hints[hintBuckets[j] - 1].push(rounds[i].teams[ourTeam].encoded_number[j]);
             }               
           }
-
-          var j;
 
           // if another team posted the guess assign hints to hint buckets
           if (rounds[i].teams[otherTeam].decoded_number) {
