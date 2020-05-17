@@ -1,6 +1,7 @@
 var szyfrant = require('./szyfrant');
 
 function testGame() {
+    console.log('Testing game');
     game = szyfrant.newGame();
     szyfrant.printGame(game);
     game = szyfrant.submitCoded(game, 0, ['raz', 'dwa', 'trzy']);
@@ -22,4 +23,8 @@ function testGame() {
     szyfrant.printGame(game);
 }
 
-testGame();
+
+
+module.exports = () => {
+    testGame();
+};
