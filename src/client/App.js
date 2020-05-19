@@ -249,6 +249,19 @@ class CodeButton extends React.Component {
   }
 }
 
+class RadzioTimer extends React.Component {
+
+  render() {
+    const deltaSeconds = this.props.delta;
+    const seconds = ("00" + Math.floor(deltaSeconds % 60)).slice (-2);
+    const minutes = ("00" + Math.floor(deltaSeconds / 60)).slice (-2);
+    console.log(this.props);
+    console.log(seconds);
+    console.log(minutes);
+    return (<div><h1>{minutes}:{seconds}</h1></div>);
+  }
+}
+
 class App extends React.Component {
   constructor() {
     super();
@@ -263,7 +276,6 @@ class App extends React.Component {
     this.startRound = this.startRound.bind(this); 
     this.joinTeamA = this.joinTeamA.bind(this); 
     this.joinTeamB = this.joinTeamB.bind(this);
-    this.startTimer = this.startTimer.bind(this);
     this.countDown = this.countDown.bind(this);      
     this.timer = 0; 
   }
@@ -313,7 +325,8 @@ class App extends React.Component {
     }
 
     countDown() {
-      console.log("Countdown called");
+      log('Forcing update on timer');
+      this.forceUpdate();
     }
 
   showGameBoard() {
@@ -449,14 +462,14 @@ class App extends React.Component {
           }
         }
                 
-        console.log('Plumk')
         if (rounds.length > 0 && rounds[rounds.length -1 ].teams[otherTeam].encoded_number_tick) {
-          console.log('Computing timer')
           var now = new Date();
-          timeSinceOponnentsTransmission = now.getTime() - rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick;          
+          timeSinceOponnentsTransmission = (now.getTime() - rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick) / 1000;          
           console.log(timeSinceOponnentsTransmission);
-          console.log('Start timer');
-          this.timer = setInterval(this.countDown, 1000);          
+          if (this.timer == 0) {
+            console.log('Starting timer');
+            this.timer = setInterval(this.countDown, 1000);
+          } 
         }
 
       }
@@ -489,6 +502,7 @@ class App extends React.Component {
           <GameBoard board_state={boardState}/>
           <HintsBoard hints={boardState.hints}/>
           <div class="game-inputbar">
+            <RadzioTimer delta={boardState.time_since_oponnents_transmission} />
             <CodeEntryForm socket={this.state.socket}/>
             <NumberEntryForm socket={this.state.socket}/>
           </div>
