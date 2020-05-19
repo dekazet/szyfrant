@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import io from 'socket.io-client'
+import { isCompositeComponent } from 'react-dom/test-utils';
 
 const TEAM_NONE = -1;
 const TEAM_A = 0;
@@ -261,7 +262,10 @@ class App extends React.Component {
     this.newGame = this.newGame.bind(this); 
     this.startRound = this.startRound.bind(this); 
     this.joinTeamA = this.joinTeamA.bind(this); 
-    this.joinTeamB = this.joinTeamB.bind(this); 
+    this.joinTeamB = this.joinTeamB.bind(this);
+    this.startTimer = this.startTimer.bind(this);
+    this.countDown = this.countDown.bind(this);      
+    this.timer = 0; 
   }
 
   componentDidMount = () => {
@@ -306,6 +310,10 @@ class App extends React.Component {
 
     joinTeamB() {
       this.state.socket.emit('game-join-b');     
+    }
+
+    countDown() {
+      console.log("Countdown called");
     }
 
   showGameBoard() {
@@ -404,6 +412,7 @@ class App extends React.Component {
       our_hints[i] = [];
     }
 
+    let timeSinceOponnentsTransmission = null;
     if (this.state.game_state && this.state.game_state.team !== TEAM_NONE) {
 
       const ourTeam = this.state.game_state.team;
@@ -418,7 +427,7 @@ class App extends React.Component {
           words[i] = rounds[i].teams[ourTeam].encoded_number.slice();
 
           var j;
-          
+
           if (rounds[i].teams[ourTeam].decoded_number) {
             guesses[i] = (""+rounds[i].teams[ourTeam].decoded_number).split("");          
             numbers[i] = (""+rounds[i].teams[ourTeam].drawn_number).split("");          
@@ -437,8 +446,19 @@ class App extends React.Component {
             for (j = 0; j < 3; j++) {
               hints[hintBuckets[j] - 1].push(rounds[i].teams[otherTeam].encoded_number[j]);
             }            
+          }
         }
+                
+        console.log('Plumk')
+        if (rounds.length > 0 && rounds[rounds.length -1 ].teams[otherTeam].encoded_number_tick) {
+          console.log('Computing timer')
+          var now = new Date();
+          timeSinceOponnentsTransmission = now.getTime() - rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick;          
+          console.log(timeSinceOponnentsTransmission);
+          console.log('Start timer');
+          this.timer = setInterval(this.countDown, 1000);          
         }
+
       }
     }
 
@@ -447,7 +467,8 @@ class App extends React.Component {
       numbers : numbers,
       guesses : guesses,
       hints : hints,
-      our_hints : our_hints
+      our_hints : our_hints,
+      time_since_oponnents_transmission : timeSinceOponnentsTransmission
     });
   }
 

@@ -1,0 +1,111 @@
+[1mdiff --git a/src/client/App.js b/src/client/App.js[m
+[1mindex 06638d6..5e9182b 100644[m
+[1m--- a/src/client/App.js[m
+[1m+++ b/src/client/App.js[m
+[36m@@ -1,6 +1,7 @@[m
+ import React from 'react';[m
+ import './App.css';[m
+ import io from 'socket.io-client'[m
+[32m+[m[32mimport { isCompositeComponent } from 'react-dom/test-utils';[m
+ [m
+ const TEAM_NONE = -1;[m
+ const TEAM_A = 0;[m
+[36m@@ -261,7 +262,10 @@[m [mclass App extends React.Component {[m
+     this.newGame = this.newGame.bind(this); [m
+     this.startRound = this.startRound.bind(this); [m
+     this.joinTeamA = this.joinTeamA.bind(this); [m
+[31m-    this.joinTeamB = this.joinTeamB.bind(this); [m
+[32m+[m[32m    this.joinTeamB = this.joinTeamB.bind(this);[m
+[32m+[m[32m    this.startTimer = this.startTimer.bind(this);[m
+[32m+[m[32m    this.countDown = this.countDown.bind(this);[m[41m      [m
+[32m+[m[32m    this.timer = 0;[m[41m [m
+   }[m
+ [m
+   componentDidMount = () => {[m
+[36m@@ -308,6 +312,10 @@[m [mclass App extends React.Component {[m
+       this.state.socket.emit('game-join-b');     [m
+     }[m
+ [m
+[32m+[m[32m    countDown() {[m
+[32m+[m[32m      console.log("Countdown called");[m
+[32m+[m[32m    }[m
+[32m+[m
+   showGameBoard() {[m
+     if (!this.state.connected) {[m
+       return false;[m
+[36m@@ -404,6 +412,7 @@[m [mclass App extends React.Component {[m
+       our_hints[i] = [];[m
+     }[m
+ [m
+[32m+[m[32m    let timeSinceOponnentsTransmission = null;[m
+     if (this.state.game_state && this.state.game_state.team !== TEAM_NONE) {[m
+ [m
+       const ourTeam = this.state.game_state.team;[m
+[36m@@ -418,7 +427,7 @@[m [mclass App extends React.Component {[m
+           words[i] = rounds[i].teams[ourTeam].encoded_number.slice();[m
+ [m
+           var j;[m
+[31m-          [m
+[32m+[m
+           if (rounds[i].teams[ourTeam].decoded_number) {[m
+             guesses[i] = (""+rounds[i].teams[ourTeam].decoded_number).split("");          [m
+             numbers[i] = (""+rounds[i].teams[ourTeam].drawn_number).split("");          [m
+[36m@@ -437,8 +446,19 @@[m [mclass App extends React.Component {[m
+             for (j = 0; j < 3; j++) {[m
+               hints[hintBuckets[j] - 1].push(rounds[i].teams[otherTeam].encoded_number[j]);[m
+             }            [m
+[32m+[m[32m          }[m
+         }[m
+[32m+[m[41m                [m
+[32m+[m[32m        console.log('Plumk')[m
+[32m+[m[32m        if (rounds.length > 0 && rounds[rounds.length -1 ].teams[otherTeam].encoded_number_tick) {[m
+[32m+[m[32m          console.log('Computing timer')[m
+[32m+[m[32m          var now = new Date();[m
+[32m+[m[32m          timeSinceOponnentsTransmission = now.getTime() - rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick;[m[41m          [m
+[32m+[m[32m          console.log(timeSinceOponnentsTransmission);[m
+[32m+[m[32m          console.log('Start timer');[m
+[32m+[m[32m          this.timer = setInterval(this.countDown, 1000);[m[41m          [m
+         }[m
+[32m+[m
+       }[m
+     }[m
+ [m
+[36m@@ -447,7 +467,8 @@[m [mclass App extends React.Component {[m
+       numbers : numbers,[m
+       guesses : guesses,[m
+       hints : hints,[m
+[31m-      our_hints : our_hints[m
+[32m+[m[32m      our_hints : our_hints,[m
+[32m+[m[32m      time_since_oponnents_transmission : timeSinceOponnentsTransmission[m
+     });[m
+   }[m
+ [m
+[1mdiff --git a/src/server/szyfrant.js b/src/server/szyfrant.js[m
+[1mindex 037db83..1c36f59 100644[m
+[1m--- a/src/server/szyfrant.js[m
+[1m+++ b/src/server/szyfrant.js[m
+[36m@@ -66,6 +66,8 @@[m [mfunction encodeNumber(game, team, encoded_number) {[m
+         log('Invalid team ' + team);        [m
+         return game;[m
+     }[m
+[32m+[m[32m    var now = new Date();[m
+[32m+[m[32m    game.rounds[game.rounds.length - 1].teams[team].encoded_number_tick = now.getTime();[m
+     game.rounds[game.rounds.length - 1].teams[team].encoded_number = encoded_number;[m
+     return game;[m
+ }[m
+[1mdiff --git a/src/server/szyfrant_test.js b/src/server/szyfrant_test.js[m
+[1mindex e5bf8c1..d7f6aef 100644[m
+[1m--- a/src/server/szyfrant_test.js[m
+[1m+++ b/src/server/szyfrant_test.js[m
+[36m@@ -1,5 +1,11 @@[m
+ var szyfrant = require('./szyfrant');[m
+ [m
+[32m+[m[32mfunction testCreateNewGame() {[m
+[32m+[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m
+[32m+[m
+ function testGame() {[m
+     console.log('Testing game');[m
+     game = szyfrant.newGame();[m

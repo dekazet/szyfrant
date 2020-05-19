@@ -66,6 +66,8 @@ function encodeNumber(game, team, encoded_number) {
         log('Invalid team ' + team);        
         return game;
     }
+    var now = new Date();
+    game.rounds[game.rounds.length - 1].teams[team].encoded_number_tick = now.getTime();
     game.rounds[game.rounds.length - 1].teams[team].encoded_number = encoded_number;
     return game;
 }

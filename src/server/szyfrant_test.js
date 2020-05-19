@@ -1,5 +1,11 @@
 var szyfrant = require('./szyfrant');
 
+function testCreateNewGame() {
+
+}
+
+
+
 function testGame() {
     console.log('Testing game');
     game = szyfrant.newGame();
