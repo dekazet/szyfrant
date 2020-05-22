@@ -1,7 +1,6 @@
 import React from 'react';
 import './App.css';
 import io from 'socket.io-client'
-import { isCompositeComponent } from 'react-dom/test-utils';
 
 const TEAM_NONE = -1;
 const TEAM_A = 0;
@@ -252,13 +251,24 @@ class CodeButton extends React.Component {
 class RadzioTimer extends React.Component {
 
   render() {
-    const deltaSeconds = this.props.delta;
-    const seconds = ("00" + Math.floor(deltaSeconds % 60)).slice (-2);
-    const minutes = ("00" + Math.floor(deltaSeconds / 60)).slice (-2);
-    console.log(this.props);
-    console.log(seconds);
-    console.log(minutes);
-    return (<div><h1>{minutes}:{seconds}</h1></div>);
+    if (this.props.show_timer) 
+    {
+      const deltaSeconds = this.props.timer_value;
+      const seconds = ("00" + Math.floor(deltaSeconds % 60)).slice (-2);
+      const minutes = ("00" + Math.floor(deltaSeconds / 60)).slice (-2);
+      let cssClass = 'timer-black';
+      if (deltaSeconds > 60) {
+        cssClass = 'timer-red';
+      }
+      console.log(this.props);
+      console.log(seconds);
+      console.log(minutes);
+      return (<div><h1 class={cssClass}>{minutes}:{seconds}</h1></div>);
+    }
+    else
+    {
+      return (<div />);
+    }
   }
 }
 
@@ -425,7 +435,9 @@ class App extends React.Component {
       our_hints[i] = [];
     }
 
-    let timeSinceOponnentsTransmission = null;
+    let timer_value = 0;
+    let show_timer = false;
+
     if (this.state.game_state && this.state.game_state.team !== TEAM_NONE) {
 
       const ourTeam = this.state.game_state.team;
@@ -462,11 +474,14 @@ class App extends React.Component {
           }
         }
                 
-        if (rounds.length > 0 && rounds[rounds.length -1 ].teams[otherTeam].encoded_number_tick) {
+        if (    rounds.length > 0 
+            &&  rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick
+            &&  !rounds[rounds.length - 1].teams[ourTeam].encoded_number_tick) {
           var now = new Date();
-          timeSinceOponnentsTransmission = (now.getTime() - rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick) / 1000;          
-          console.log(timeSinceOponnentsTransmission);
-          if (this.timer == 0) {
+          timer_value = (now.getTime() - rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick) / 1000;          
+          show_timer = true;
+          console.log(timer_value);
+          if (this.timer === 0) {
             console.log('Starting timer');
             this.timer = setInterval(this.countDown, 1000);
           } 
@@ -481,7 +496,8 @@ class App extends React.Component {
       guesses : guesses,
       hints : hints,
       our_hints : our_hints,
-      time_since_oponnents_transmission : timeSinceOponnentsTransmission
+      show_timer : show_timer,
+      timer_value : timer_value
     });
   }
 
@@ -502,7 +518,7 @@ class App extends React.Component {
           <GameBoard board_state={boardState}/>
           <HintsBoard hints={boardState.hints}/>
           <div class="game-inputbar">
-            <RadzioTimer delta={boardState.time_since_oponnents_transmission} />
+            <RadzioTimer show_timer={boardState.show_timer} timer_value={boardState.timer_value} />
             <CodeEntryForm socket={this.state.socket}/>
             <NumberEntryForm socket={this.state.socket}/>
           </div>

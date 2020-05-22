@@ -3,6 +3,15 @@ body {
   font: Courier New,monospace;
 }
 
+.timer-black {
+  color: black;
+}
+
+.timer-red {
+  color: red;
+  font-size: 56px;
+}
+
 .game-main {
   background:#eeeedd;
   width: 640px;
