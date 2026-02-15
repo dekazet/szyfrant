@@ -183,4 +183,5 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-server.listen(666, () => {log('Szyfrant server up listening at port 666.')});
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {log('Szyfrant server up listening at port ' + PORT + '.')});

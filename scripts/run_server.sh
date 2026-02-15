@@ -1,2 +1,2 @@
-sudo node deployment/server.js
+node deployment/server.js
 

@@ -288,8 +288,7 @@ class App extends React.Component {
   }
 
   componentDidMount = () => {
-    //const socket = io('http://szyfrant.kozlowscy.us:666');
-    const socket = io('http://localhost:3000');
+    const socket = io(window.location.origin);
 
     socket.on('disconnect', () => {
         log('Disconnected from the server');
