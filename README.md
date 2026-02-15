@@ -1,68 +1,55 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Szyfrant
 
-## Available Scripts
+A real-time multiplayer web game for two teams — a cipher/code-cracking party game inspired by Decrypto. Teams encode and decode 3-digit numbers using word-based clues across up to 8 rounds. All UI text is in Polish.
 
-In the project directory, you can run:
+## Setup
 
-### `npm start`
+```bash
+npm install
+```
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Development
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+Run both the frontend dev server and the backend simultaneously (two terminals):
 
-### `npm test`
+```bash
+npm run server     # Backend Express/Socket.IO server on port 666
+npm start          # Frontend Webpack dev server on port 3000 (proxies Socket.IO to backend)
+```
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Then open http://localhost:3000 in your browser. Open multiple tabs/browsers to simulate two teams.
 
-### `npm run build`
+## Commands
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| Command | Description |
+|---------|-------------|
+| `npm start` | Webpack dev server on port 3000 with hot reload |
+| `npm run server` | Backend Express + Socket.IO server on port 666 |
+| `npm run build` | Production build to `./build/` |
+| `npm test` | Runs server-side game logic tests |
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+## Production Deployment
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm run build
+bash scripts/deploy.sh
+```
 
-### `npm run eject`
+This copies the server files and the built frontend into `./deployment/`. In production, only the backend process is needed — it serves the static React build via Express on port 666.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```bash
+sudo node deployment/server.js
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Tech Stack
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- **Frontend:** React 16 (class components), Socket.IO Client 2.3
+- **Backend:** Express 4 + Socket.IO 2.3 (Node.js)
+- **Build:** Ejected Create React App (Webpack 4, Babel 7)
+- **Tests:** Custom assertion-based test runner (server-side game logic)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## How It Works
 
-## Learn More
+Each team has 4 secret words visible only to them. Each round, the team's encoder draws a 3-digit number (digits 1-4, no repeats) and gives one-word clues that hint at the corresponding secret words. The opposing team sees the clues and tries to guess the number.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+The server filters game state per team so that the opponent's drawn number is hidden until your team submits a guess. All submissions are validated server-side (clue format, number validity, double-submit prevention).

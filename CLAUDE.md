@@ -11,7 +11,7 @@ Szyfrant is a real-time multiplayer web game for two teams (a cipher/code-cracki
 - **Frontend:** React 16 (class components), Socket.IO Client 2.3
 - **Backend:** Express 4 + Socket.IO 2.3 (Node.js)
 - **Build:** Ejected Create React App (Webpack 4, Babel 7)
-- **Tests:** Jest (client), custom test runner (server)
+- **Tests:** Custom assertion-based test runner (server)
 
 ## Commands
 
@@ -32,18 +32,19 @@ Deployment: `bash scripts/deploy.sh` copies server files + build output to `./de
 
 Single-file React app in `App.js` with all components defined inline as class components:
 - **App** — Root component. Manages Socket.IO connection, game state, and timer. Connects to `http://localhost:3000`.
-- **GameBoard** — Renders 8 round cards in a 2×4 grid.
+- **GameBoard** — Renders 8 round cards in a 2x4 grid.
 - **RoundCard** — Displays encoded words and decoded numbers for one round.
 - **HintsBoard / GameBoardKyes** — Shows opponent hint history organized by key number (1-4).
 - **CodeEntryForm** — 3 text inputs for encoding (submitting clue words).
 - **NumberEntryForm** — Single input for decoding (guessing the number).
 - **CodeButton** — Double-click to reveal drawn number (auto-hides after 2s).
-- **RadzioTimer** — Countdown timer shown when opposing team has submitted but your team hasn't.
+- **RadzioTimer** — Countdown timer shown when opposing team has submitted but your team hasn't. Timer interval is properly cleaned up when no longer needed.
 
 ### Server (`src/server/`)
 
-- **server.js** — Express + Socket.IO server. Manages team membership via in-memory Sets (socket IDs). Broadcasts filtered game state per team.
-- **szyfrant.js** — Pure game logic module. Exports: `newGame()`, `startRound(game)`, `submitCoded(game, team, encoded)`, `submitDecoded(game, team, decoded)`, `printGame(game)`.
+- **server.js** — Express + Socket.IO server. Manages team membership via in-memory Sets (socket IDs). Uses `filterStateForTeam()` to redact opponent's `drawn_number` before broadcasting — each team only sees the opponent's secret number after submitting their own decode guess. Game-control events (`game-new`, `game-start-round`) require the client to have joined a team.
+- **szyfrant.js** — Pure game logic module. All state transitions (`startRound`, `submitCoded`, `submitDecoded`) return new objects (immutable updates via `Object.assign`). Validates inputs: encoded clues must be exactly 3 non-empty strings, decoded numbers must be valid permutations from the number pool, and double-submissions per round are rejected.
+- **szyfrant_test.js** — Assertion-based tests covering game creation, drawn number validity, round limits, encode/decode with validation, double-submit prevention, state immutability, and full multi-round game flow. Exits with code 1 on failure.
 
 ### Game State Structure
 
@@ -65,7 +66,7 @@ Single-file React app in `App.js` with all components defined inline as class co
 
 Client emits: `game-state`, `game-join-a`, `game-join-b`, `game-new`, `game-start-round`, `game-submit-codednumber`, `game-submit-decodednumber`
 
-Server broadcasts: `game-state` (with team field injected per recipient)
+Server broadcasts: `game-state` (filtered per team — opponent's `drawn_number` redacted until decode guess submitted)
 
 ## Key Conventions
 
@@ -74,3 +75,4 @@ Server broadcasts: `game-state` (with team field injected per recipient)
 - Number pool: 24 permutations of digits 1-4 without repeats (e.g., 123, 412)
 - Word pool: 500+ Polish nouns in `szyfrant.js`
 - CSS uses `class` attribute (not `className`) throughout JSX
+- CSS is responsive with a mobile breakpoint at 480px
