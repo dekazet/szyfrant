@@ -51,6 +51,24 @@ function validTeam(team) {
     return team == 0 || team == 1;
 }
 
+var validNumbers = new Set(numbers.map(String));
+
+function validEncodedNumber(encoded_number) {
+    if (!Array.isArray(encoded_number) || encoded_number.length !== 3) {
+        return false;
+    }
+    for (var i = 0; i < 3; i++) {
+        if (typeof encoded_number[i] !== 'string' || encoded_number[i].trim() === '') {
+            return false;
+        }
+    }
+    return true;
+}
+
+function validDecodedNumber(decoded_number) {
+    return validNumbers.has(String(decoded_number));
+}
+
 function startRound(game) {
     if (game.rounds.length == 8) {
         log('Already started 8th round');
@@ -64,6 +82,15 @@ function startRound(game) {
 function encodeNumber(game, team, encoded_number) {
     if (!validTeam(team)) {
         log('Invalid team ' + team);
+        return game;
+    }
+    if (!validEncodedNumber(encoded_number)) {
+        log('Invalid encoded_number from team ' + team);
+        return game;
+    }
+    var currentTeam = game.rounds[game.rounds.length - 1].teams[team];
+    if (currentTeam.encoded_number_tick) {
+        log('Team ' + team + ' already encoded this round');
         return game;
     }
     var now = new Date();
@@ -83,6 +110,15 @@ function encodeNumber(game, team, encoded_number) {
 function decodeNumber(game, team, decoded_number) {
     if (!validTeam(team)) {
         log('Invalid team');
+        return game;
+    }
+    if (!validDecodedNumber(decoded_number)) {
+        log('Invalid decoded_number from team ' + team + ': ' + decoded_number);
+        return game;
+    }
+    var currentTeam = game.rounds[game.rounds.length - 1].teams[team];
+    if (currentTeam.decoded_number) {
+        log('Team ' + team + ' already decoded this round');
         return game;
     }
     var lastIndex = game.rounds.length - 1;

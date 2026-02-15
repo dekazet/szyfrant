@@ -130,15 +130,23 @@ io.on('connection', (socket) => {
       sendState(socket);
     });
 
-    socket.on('game-new', () => { 
-      log('game-new from ' + socket.id); 
-      state = szyfrant.newGame(); 
+    socket.on('game-new', () => {
+      log('game-new from ' + socket.id);
+      if (teamFromClient(socket.id) == TEAM_NONE) {
+        log('Rejected game-new from unjoined client');
+        return;
+      }
+      state = szyfrant.newGame();
       sendState(socket);
     });
 
-    socket.on('game-start-round', () => { 
-      log('game-start-round from ' + socket.id); 
-      state = szyfrant.startRound(state); 
+    socket.on('game-start-round', () => {
+      log('game-start-round from ' + socket.id);
+      if (teamFromClient(socket.id) == TEAM_NONE) {
+        log('Rejected game-start-round from unjoined client');
+        return;
+      }
+      state = szyfrant.startRound(state);
       sendState(socket);
     });
 
