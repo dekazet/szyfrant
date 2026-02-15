@@ -314,6 +314,13 @@ class App extends React.Component {
     this.setState({socket : socket});
   }
 
+  componentWillUnmount() {
+    if (this.timer !== 0) {
+      clearInterval(this.timer);
+      this.timer = 0;
+    }
+  }
+
     refreshGameState() {
       this.state.socket.emit('game-state');
     }
@@ -474,17 +481,18 @@ class App extends React.Component {
           }
         }
                 
-        if (    rounds.length > 0 
+        if (    rounds.length > 0
             &&  rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick
             &&  !rounds[rounds.length - 1].teams[ourTeam].encoded_number_tick) {
           var now = new Date();
-          timer_value = (now.getTime() - rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick) / 1000;          
+          timer_value = (now.getTime() - rounds[rounds.length - 1].teams[otherTeam].encoded_number_tick) / 1000;
           show_timer = true;
-          console.log(timer_value);
           if (this.timer === 0) {
-            console.log('Starting timer');
             this.timer = setInterval(this.countDown, 1000);
-          } 
+          }
+        } else if (this.timer !== 0) {
+          clearInterval(this.timer);
+          this.timer = 0;
         }
 
       }
