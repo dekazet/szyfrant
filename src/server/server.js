@@ -32,20 +32,37 @@ const TEAM_NONE = -1;
 const TEAM_A = 0;
 const TEAM_B = 1;
 
-state = szyfrant.newGame();
-team_a = new Set();
-team_b = new Set();
+// Room-based game state: each room has its own game, team sets
+var rooms = {};
+var socketToRoom = {};
 
-function teamFromClient(id) {
-  if (team_a.has(id)) {
-    log("Mapped client: " + id + " to Team A");
+function getOrCreateRoom(roomId) {
+  if (!rooms[roomId]) {
+    log('Creating new room: ' + roomId);
+    rooms[roomId] = {
+      state: szyfrant.newGame(),
+      team_a: new Set(),
+      team_b: new Set()
+    };
+  }
+  return rooms[roomId];
+}
+
+function getRoomForSocket(socketId) {
+  var roomId = socketToRoom[socketId];
+  if (!roomId || !rooms[roomId]) {
+    return null;
+  }
+  return rooms[roomId];
+}
+
+function teamFromClient(room, id) {
+  if (room.team_a.has(id)) {
     return TEAM_A;
   }
-  if (team_b.has(id)) {
-    log("Mapped client: " + id + " to Team B");
+  if (room.team_b.has(id)) {
     return TEAM_B;
   }
-  log("Mapped client: " + id + " to Team None");
   return TEAM_NONE;
 }
 
@@ -79,103 +96,137 @@ function filterStateForTeam(gameState, viewingTeam) {
   });
 }
 
-function sendState(socket) {
+function sendState(room, socket) {
 
   let seenCaller = false;
 
-  team_a.forEach((socketId) => {
-    let game_state = filterStateForTeam(state, TEAM_A);
-    log('Sending state to client ' + socketId + " [Team A]");
-    io.to(socketId).emit('game-state', game_state );
+  room.team_a.forEach((socketId) => {
+    let game_state = filterStateForTeam(room.state, TEAM_A);
+    io.to(socketId).emit('game-state', game_state);
     if (socketId == socket.id) {
       seenCaller = true;
     }
   });
 
-  team_b.forEach((socketId) => {
-    let game_state = filterStateForTeam(state, TEAM_B);
-    log('Sending state to client ' + socketId + " [Team B]");
-    io.to(socketId).emit('game-state', game_state );
+  room.team_b.forEach((socketId) => {
+    let game_state = filterStateForTeam(room.state, TEAM_B);
+    io.to(socketId).emit('game-state', game_state);
     if (socketId == socket.id) {
       seenCaller = true;
     }
   });
 
   if (!seenCaller) {
-    let game_state = filterStateForTeam(state, TEAM_NONE);
-    log('Sending state to client  ' + socket.id + " [Team None?]");
-    socket.emit('game-state', game_state );
+    let game_state = filterStateForTeam(room.state, TEAM_NONE);
+    socket.emit('game-state', game_state);
   }
 }
 
 io.on('connection', (socket) => {
     log('Client ' + socket.id +  ' connected from ' + socket.request.connection.remoteAddress);
 
-    socket.on('game-state', () => { 
-      log('game-state from ' + socket.id);
-      sendState(socket);
+    socket.on('game-join-room', (roomId) => {
+      // Sanitize room ID: alphanumeric + hyphens, max 32 chars
+      if (typeof roomId !== 'string' || !roomId) {
+        roomId = 'default';
+      }
+      roomId = roomId.replace(/[^a-zA-Z0-9\-]/g, '').substring(0, 32) || 'default';
+      log('Client ' + socket.id + ' joining room: ' + roomId);
+
+      // Leave previous room if any
+      var prevRoom = getRoomForSocket(socket.id);
+      if (prevRoom) {
+        prevRoom.team_a.delete(socket.id);
+        prevRoom.team_b.delete(socket.id);
+      }
+
+      socketToRoom[socket.id] = roomId;
+      var room = getOrCreateRoom(roomId);
+      sendState(room, socket);
     });
 
-    socket.on('game-join-a', () => { 
+    socket.on('game-state', () => {
+      var room = getRoomForSocket(socket.id);
+      if (!room) return;
+      sendState(room, socket);
+    });
+
+    socket.on('game-join-a', () => {
+      var room = getRoomForSocket(socket.id);
+      if (!room) return;
       log('team-join-a from ' + socket.id);
-      team_a.add(socket.id);
-      team_b.delete(socket.id);
-      sendState(socket);
+      room.team_a.add(socket.id);
+      room.team_b.delete(socket.id);
+      sendState(room, socket);
     });
 
-    socket.on('game-join-b', () => { 
+    socket.on('game-join-b', () => {
+      var room = getRoomForSocket(socket.id);
+      if (!room) return;
       log('team-join-b from ' + socket.id);
-      team_a.delete(socket.id);
-      team_b.add(socket.id);
-      sendState(socket);
+      room.team_a.delete(socket.id);
+      room.team_b.add(socket.id);
+      sendState(room, socket);
     });
 
     socket.on('game-new', () => {
+      var room = getRoomForSocket(socket.id);
+      if (!room) return;
       log('game-new from ' + socket.id);
-      if (teamFromClient(socket.id) == TEAM_NONE) {
+      if (teamFromClient(room, socket.id) == TEAM_NONE) {
         log('Rejected game-new from unjoined client');
         return;
       }
-      state = szyfrant.newGame();
-      sendState(socket);
+      room.state = szyfrant.newGame();
+      sendState(room, socket);
     });
 
     socket.on('game-start-round', () => {
+      var room = getRoomForSocket(socket.id);
+      if (!room) return;
       log('game-start-round from ' + socket.id);
-      if (teamFromClient(socket.id) == TEAM_NONE) {
+      if (teamFromClient(room, socket.id) == TEAM_NONE) {
         log('Rejected game-start-round from unjoined client');
         return;
       }
-      state = szyfrant.startRound(state);
-      sendState(socket);
+      room.state = szyfrant.startRound(room.state);
+      sendState(room, socket);
     });
 
-    socket.on('game-submit-codednumber', (codedNumber) => { 
+    socket.on('game-submit-codednumber', (codedNumber) => {
+      var room = getRoomForSocket(socket.id);
+      if (!room) return;
       log('game-submit-codednumber from ' + socket.id);
-      const team = teamFromClient(socket.id);
+      const team = teamFromClient(room, socket.id);
       if (team == TEAM_NONE) {
         log('Unable to map client to a team');
       } else {
-        state = szyfrant.submitCoded(state, team, codedNumber); 
-        sendState(socket);
+        room.state = szyfrant.submitCoded(room.state, team, codedNumber);
+        sendState(room, socket);
       }
     });
 
-    socket.on('game-submit-decodednumber', (number) => { 
-      log('game-submit-decodednumber from ' + socket.id); 
-      const team = teamFromClient(socket.id);
+    socket.on('game-submit-decodednumber', (number) => {
+      var room = getRoomForSocket(socket.id);
+      if (!room) return;
+      log('game-submit-decodednumber from ' + socket.id);
+      const team = teamFromClient(room, socket.id);
       if (team == TEAM_NONE) {
-        log('Unable to map client to a team');  
+        log('Unable to map client to a team');
       } else {
-        state = szyfrant.submitDecoded(state, team, number); 
-        sendState(socket);
+        room.state = szyfrant.submitDecoded(room.state, team, number);
+        sendState(room, socket);
       }
     });
-    
+
     socket.on('disconnect', () => {
       log('Client ' + socket.id + ' disconnected');
-      team_a.delete(socket.id);
-      team_b.delete(socket.id);
+      var room = getRoomForSocket(socket.id);
+      if (room) {
+        room.team_a.delete(socket.id);
+        room.team_b.delete(socket.id);
+      }
+      delete socketToRoom[socket.id];
     });
 });
 

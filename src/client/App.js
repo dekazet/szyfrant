@@ -289,6 +289,7 @@ class App extends React.Component {
 
   componentDidMount = () => {
     const socket = io(window.location.origin);
+    const roomId = window.location.hash.replace('#', '') || 'default';
 
     socket.on('disconnect', () => {
         log('Disconnected from the server');
@@ -298,7 +299,7 @@ class App extends React.Component {
     socket.on('connect', () => {
       log('Connected to the server');
       this.setState({connected : true});
-      this.state.socket.emit('game-state');
+      socket.emit('game-join-room', roomId);
     })
 
     socket.on('game-state', (game_state) => { 
@@ -513,7 +514,7 @@ class App extends React.Component {
     if (this.showGameBoard()) {
       return (
         <div class="game-main">
-          <div class="game-titlebar"><h2>S Z Y F R A N T</h2></div>
+          <div class="game-titlebar"><h2>S Z Y F R A N T</h2><div class="game-room-label">Pokoj: {window.location.hash.replace('#', '') || 'default'}</div></div>
           {gameHeader}
           {wordsBar}
           <HintsBoard hints={boardState.our_hints}/>
@@ -529,7 +530,7 @@ class App extends React.Component {
     } else {
       return (
         <div class="game-main">
-          <div class="game-titlebar"><h2>S Z Y F R A N T</h2></div>
+          <div class="game-titlebar"><h2>S Z Y F R A N T</h2><div class="game-room-label">Pokoj: {window.location.hash.replace('#', '') || 'default'}</div></div>
           {gameHeader}
         </div>);
     }
