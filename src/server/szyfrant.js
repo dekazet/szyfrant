@@ -63,22 +63,38 @@ function startRound(game) {
 
 function encodeNumber(game, team, encoded_number) {
     if (!validTeam(team)) {
-        log('Invalid team ' + team);        
+        log('Invalid team ' + team);
         return game;
     }
     var now = new Date();
-    game.rounds[game.rounds.length - 1].teams[team].encoded_number_tick = now.getTime();
-    game.rounds[game.rounds.length - 1].teams[team].encoded_number = encoded_number;
-    return game;
+    var lastIndex = game.rounds.length - 1;
+    var updatedTeamEntry = Object.assign({}, game.rounds[lastIndex].teams[team], {
+        encoded_number_tick: now.getTime(),
+        encoded_number: encoded_number
+    });
+    var updatedTeams = game.rounds[lastIndex].teams.slice();
+    updatedTeams[team] = updatedTeamEntry;
+    var updatedRound = Object.assign({}, game.rounds[lastIndex], {teams: updatedTeams});
+    var updatedRounds = game.rounds.slice();
+    updatedRounds[lastIndex] = updatedRound;
+    return Object.assign({}, game, {rounds: updatedRounds});
 }
 
 function decodeNumber(game, team, decoded_number) {
     if (!validTeam(team)) {
-        log('Invalid team');        
+        log('Invalid team');
         return game;
     }
-    game.rounds[game.rounds.length - 1].teams[team].decoded_number = decoded_number;
-    return game;
+    var lastIndex = game.rounds.length - 1;
+    var updatedTeamEntry = Object.assign({}, game.rounds[lastIndex].teams[team], {
+        decoded_number: decoded_number
+    });
+    var updatedTeams = game.rounds[lastIndex].teams.slice();
+    updatedTeams[team] = updatedTeamEntry;
+    var updatedRound = Object.assign({}, game.rounds[lastIndex], {teams: updatedTeams});
+    var updatedRounds = game.rounds.slice();
+    updatedRounds[lastIndex] = updatedRound;
+    return Object.assign({}, game, {rounds: updatedRounds});
 }
 
 function printGame(game) {
