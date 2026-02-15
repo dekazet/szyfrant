@@ -291,6 +291,13 @@ class App extends React.Component {
     const socket = io(window.location.origin);
     const roomId = window.location.hash.replace('#', '') || 'default';
 
+    // Get or create a persistent player ID
+    var playerId = localStorage.getItem('szyfrant-player-id');
+    if (!playerId) {
+      playerId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('szyfrant-player-id', playerId);
+    }
+
     socket.on('disconnect', () => {
         log('Disconnected from the server');
         this.setState({connected : false});
@@ -299,7 +306,7 @@ class App extends React.Component {
     socket.on('connect', () => {
       log('Connected to the server');
       this.setState({connected : true});
-      socket.emit('game-join-room', roomId);
+      socket.emit('game-join-room', {roomId: roomId, playerId: playerId});
     })
 
     socket.on('game-state', (game_state) => { 

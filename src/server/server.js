@@ -35,6 +35,7 @@ const TEAM_B = 1;
 // Room-based game state: each room has its own game, team sets
 var rooms = {};
 var socketToRoom = {};
+var socketToPlayer = {};
 
 function getOrCreateRoom(roomId) {
   if (!rooms[roomId]) {
@@ -42,7 +43,8 @@ function getOrCreateRoom(roomId) {
     rooms[roomId] = {
       state: szyfrant.newGame(),
       team_a: new Set(),
-      team_b: new Set()
+      team_b: new Set(),
+      playerTeams: {}
     };
   }
   return rooms[roomId];
@@ -125,13 +127,19 @@ function sendState(room, socket) {
 io.on('connection', (socket) => {
     log('Client ' + socket.id +  ' connected from ' + socket.request.connection.remoteAddress);
 
-    socket.on('game-join-room', (roomId) => {
+    socket.on('game-join-room', (data) => {
+      var roomId = (data && data.roomId) || 'default';
+      var playerId = (data && data.playerId) || '';
+
       // Sanitize room ID: alphanumeric + hyphens, max 32 chars
-      if (typeof roomId !== 'string' || !roomId) {
-        roomId = 'default';
-      }
+      if (typeof roomId !== 'string') roomId = 'default';
       roomId = roomId.replace(/[^a-zA-Z0-9\-]/g, '').substring(0, 32) || 'default';
-      log('Client ' + socket.id + ' joining room: ' + roomId);
+
+      // Sanitize player ID: alphanumeric + hyphens, max 36 chars
+      if (typeof playerId !== 'string') playerId = '';
+      playerId = playerId.replace(/[^a-zA-Z0-9\-]/g, '').substring(0, 36);
+
+      log('Client ' + socket.id + ' (player ' + playerId + ') joining room: ' + roomId);
 
       // Leave previous room if any
       var prevRoom = getRoomForSocket(socket.id);
@@ -141,7 +149,18 @@ io.on('connection', (socket) => {
       }
 
       socketToRoom[socket.id] = roomId;
+      socketToPlayer[socket.id] = playerId;
       var room = getOrCreateRoom(roomId);
+
+      // Restore team membership if player was previously in this room
+      if (playerId && room.playerTeams[playerId] === TEAM_A) {
+        log('Restoring player ' + playerId + ' to Team A');
+        room.team_a.add(socket.id);
+      } else if (playerId && room.playerTeams[playerId] === TEAM_B) {
+        log('Restoring player ' + playerId + ' to Team B');
+        room.team_b.add(socket.id);
+      }
+
       sendState(room, socket);
     });
 
@@ -157,6 +176,8 @@ io.on('connection', (socket) => {
       log('team-join-a from ' + socket.id);
       room.team_a.add(socket.id);
       room.team_b.delete(socket.id);
+      var playerId = socketToPlayer[socket.id];
+      if (playerId) room.playerTeams[playerId] = TEAM_A;
       sendState(room, socket);
     });
 
@@ -166,6 +187,8 @@ io.on('connection', (socket) => {
       log('team-join-b from ' + socket.id);
       room.team_a.delete(socket.id);
       room.team_b.add(socket.id);
+      var playerId = socketToPlayer[socket.id];
+      if (playerId) room.playerTeams[playerId] = TEAM_B;
       sendState(room, socket);
     });
 
@@ -227,6 +250,7 @@ io.on('connection', (socket) => {
         room.team_b.delete(socket.id);
       }
       delete socketToRoom[socket.id];
+      delete socketToPlayer[socket.id];
     });
 });
 
