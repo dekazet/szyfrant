@@ -168,6 +168,39 @@ function testFullGame() {
     assertEqual(game.rounds[0].teams[0].encoded_number[0], 'raz', 'round 1 data preserved');
 }
 
+function testScoring() {
+    var game = szyfrant.newGame();
+    var drawnA = game.rounds[0].teams[0].drawn_number;
+    var drawnB = game.rounds[0].teams[1].drawn_number;
+
+    // No decodes yet — scores should be 0-0
+    var scores = szyfrant.computeScores(game);
+    assertEqual(scores[0], 0, 'initial score A is 0');
+    assertEqual(scores[1], 0, 'initial score B is 0');
+
+    // Team A guesses Team B's number correctly
+    game = szyfrant.submitCoded(game, 0, ['a', 'b', 'c']);
+    game = szyfrant.submitCoded(game, 1, ['d', 'e', 'f']);
+    game = szyfrant.submitDecoded(game, 0, drawnB);
+    game = szyfrant.submitDecoded(game, 1, 123); // wrong guess
+
+    scores = szyfrant.computeScores(game);
+    assertEqual(scores[0], 1, 'team A scores 1 for correct guess');
+    var expectedB = (String(123) === String(drawnA)) ? 1 : 0;
+    assertEqual(scores[1], expectedB, 'team B score matches whether guess was correct');
+
+    // Round 2: both guess wrong
+    game = szyfrant.startRound(game);
+    game = szyfrant.submitCoded(game, 0, ['g', 'h', 'i']);
+    game = szyfrant.submitCoded(game, 1, ['j', 'k', 'l']);
+    game = szyfrant.submitDecoded(game, 0, 432);
+    game = szyfrant.submitDecoded(game, 1, 432);
+
+    scores = szyfrant.computeScores(game);
+    // Team A still has 1 from round 1 (unless 432 happens to match)
+    assert(scores[0] >= 1, 'team A keeps previous score');
+}
+
 module.exports = () => {
     testCreateNewGame();
     testDrawnNumbers();
@@ -180,6 +213,7 @@ module.exports = () => {
     testSubmitDecodedDoubleSubmit();
     testImmutability();
     testFullGame();
+    testScoring();
 
     console.log('\nResults: ' + passed + ' passed, ' + failed + ' failed');
     if (failed > 0) {

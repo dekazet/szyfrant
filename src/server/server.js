@@ -94,7 +94,8 @@ function filterStateForTeam(gameState, viewingTeam) {
 
   return Object.assign({}, gameState, {
     team: viewingTeam,
-    rounds: filteredRounds
+    rounds: filteredRounds,
+    scores: szyfrant.computeScores(gameState)
   });
 }
 

@@ -133,6 +133,24 @@ function decodeNumber(game, team, decoded_number) {
     return Object.assign({}, game, {rounds: updatedRounds});
 }
 
+function computeScores(game) {
+    var scores = [0, 0];
+    for (var i = 0; i < game.rounds.length; i++) {
+        var round = game.rounds[i];
+        // Team A scores if their decode matches Team B's drawn number
+        if (round.teams[0].decoded_number && round.teams[1].drawn_number &&
+            String(round.teams[0].decoded_number) === String(round.teams[1].drawn_number)) {
+            scores[0]++;
+        }
+        // Team B scores if their decode matches Team A's drawn number
+        if (round.teams[1].decoded_number && round.teams[0].drawn_number &&
+            String(round.teams[1].decoded_number) === String(round.teams[0].drawn_number)) {
+            scores[1]++;
+        }
+    }
+    return scores;
+}
+
 function printGame(game) {
     log('-----------------');
     log(game);
@@ -149,5 +167,6 @@ module.exports = {
     startRound : (game) => { return startRound(game); },
     submitCoded : (game, team, encoded_number) => { return encodeNumber(game, team, encoded_number); },
     submitDecoded : (game, team, decoded_number) => { return decodeNumber(game, team, decoded_number); },
+    computeScores : (game) => { return computeScores(game); },
     printGame : (game) => { printGame(game); },
 };

@@ -396,9 +396,12 @@ class App extends React.Component {
       drawnNumber = team.drawn_number;
     }
 
+    const scores = this.state.game_state.scores || [0, 0];
+
     return (
     <div class="game-statusbar">
       <div class="game-infobar-text">{team}</div>
+      <div class="game-infobar-text">Wynik: {scores[TEAM_A]} - {scores[TEAM_B]}</div>
       <div class="game-infobar-text">Runda: 0{this.state.game_state.rounds.length}</div>
       <button class="game-infobar-button" onClick={this.newGame}>Nowa gra</button>
       <button class="game-infobar-button" onClick={this.startRound}>Nastepna runda</button>
