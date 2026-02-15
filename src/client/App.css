@@ -1,6 +1,12 @@
-body {  
+body {
   background:#eeeedd;
   font: Courier New,monospace;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
 .timer-black {
@@ -14,7 +20,8 @@ body {
 
 .game-main {
   background:#eeeedd;
-  width: 640px;
+  max-width: 640px;
+  width: 100%;
   margin: 0 auto;
   margin-top: 2px;
   padding: 2px;
@@ -28,7 +35,7 @@ body {
 
 .game-join-buttons {
   margin: 0 auto;
-  text-align: center;  
+  text-align: center;
 }
 
 .game-infobar-button {
@@ -49,8 +56,9 @@ body {
 }
 
 .game-statusbar {
-  background:#dddddd; 
+  background:#dddddd;
   display: flex;
+  flex-wrap: wrap;
   font-weight: bold;
   text-align: center;
   padding: 2px;
@@ -59,12 +67,12 @@ body {
 .game-wordsbar {
   background:#eeeedd;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
 }
 
 .game-wordsbar-word {
   background:#eeeedd;
-  justify-content: center;
   font-size: 18px;
   font-weight: bold;
   padding : 10px;
@@ -77,14 +85,13 @@ body {
 .game-board {
   background:#eeeedd;
   padding: 5px;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr; 
   display: flex;
   flex-direction: column;
   height: auto;
 }
 .game-board-row {
   display: flex;
+  flex-wrap: wrap;
   padding: 5px;
   justify-content: center;
   align-items: center;
@@ -130,22 +137,20 @@ body {
 }
 
 .game-board-hints {
-  width: 630px;
+  width: 100%;
   display: flex;
-  justify-content: center;
-  display: flex;
-  justify-content: space-between;  
+  flex-wrap: wrap;
+  justify-content: space-between;
   padding : 2px;
 }
 
 .game-board-keys {
-  background:#bbbbbb; 
-  width: 140px;
+  background:#bbbbbb;
+  min-width: 120px;
+  flex: 1;
   padding: 2px;
-  grid-template-columns: 1fr; 
   display: flex;
   flex-direction: column;
-  grid-row-gap: 0;
 }
 
 .game-board-keys-header {
@@ -163,27 +168,28 @@ body {
 }
 
 .game-inputbar {
-  width: 630px;
+  width: 100%;
   padding : 2px;
   display: flex;
+  flex-wrap: wrap;
   text-align: center;
   justify-content: center;
   align-items: center;
-  white-space:nowrap;  
 }
 
 .code-entry-form {
   padding : 2px;
   display: flex;
+  flex-wrap: wrap;
   text-align: center;
   justify-content: center;
   align-items: center;
-  white-space:nowrap;  
 }
 
 .code-entry-field
 {
   font-size: 16px;
+  max-width: 100%;
 }
 
 .code-entry-button {
@@ -191,4 +197,52 @@ body {
   padding : 4px;
   padding-top: 1px;
   padding-bottom: 1px;
+}
+
+@media (max-width: 480px) {
+  .game-main {
+    border: none;
+    margin-top: 0;
+  }
+
+  .game-statusbar {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .game-wordsbar {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .game-wordsbar-word {
+    font-size: 16px;
+    padding: 4px;
+  }
+
+  .game-board-row {
+    flex-direction: column;
+  }
+
+  .game-card-word {
+    width: 150px;
+  }
+
+  .game-board-hints {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .game-board-keys {
+    width: 100%;
+  }
+
+  .game-inputbar {
+    flex-direction: column;
+  }
+
+  .timer-red {
+    font-size: 36px;
+  }
 }
