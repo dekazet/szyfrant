@@ -260,9 +260,6 @@ class RadzioTimer extends React.Component {
       if (deltaSeconds > 60) {
         cssClass = 'timer-red';
       }
-      console.log(this.props);
-      console.log(seconds);
-      console.log(minutes);
       return (<div><h1 class={cssClass}>{minutes}:{seconds}</h1></div>);
     }
     else
