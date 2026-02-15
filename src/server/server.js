@@ -49,36 +49,62 @@ function teamFromClient(id) {
   return TEAM_NONE;
 }
 
+function filterStateForTeam(gameState, viewingTeam) {
+  if (viewingTeam === TEAM_NONE) {
+    return Object.assign({}, gameState, {team: TEAM_NONE});
+  }
+
+  var otherTeam = viewingTeam === TEAM_A ? TEAM_B : TEAM_A;
+
+  var filteredRounds = gameState.rounds.map(function(round) {
+    var ourTeamData = round.teams[viewingTeam];
+    var otherTeamData = round.teams[otherTeam];
+
+    // Redact opponent's drawn_number until our team has submitted a decode guess
+    var filteredOtherTeam = Object.assign({}, otherTeamData);
+    if (!ourTeamData.decoded_number) {
+      filteredOtherTeam.drawn_number = 0;
+    }
+
+    var teams = [];
+    teams[viewingTeam] = ourTeamData;
+    teams[otherTeam] = filteredOtherTeam;
+
+    return Object.assign({}, round, {teams: teams});
+  });
+
+  return Object.assign({}, gameState, {
+    team: viewingTeam,
+    rounds: filteredRounds
+  });
+}
+
 function sendState(socket) {
 
   let seenCaller = false;
 
   team_a.forEach((socketId) => {
-    let game_state = Object.assign({}, state, {team : teamFromClient(socketId)});
+    let game_state = filterStateForTeam(state, TEAM_A);
     log('Sending state to client ' + socketId + " [Team A]");
     io.to(socketId).emit('game-state', game_state );
-    //szyfrant.printGame(game_state);
     if (socketId == socket.id) {
       seenCaller = true;
     }
   });
 
-
   team_b.forEach((socketId) => {
-    let game_state = Object.assign({}, state, {team : teamFromClient(socketId)});
+    let game_state = filterStateForTeam(state, TEAM_B);
     log('Sending state to client ' + socketId + " [Team B]");
     io.to(socketId).emit('game-state', game_state );
-    //szyfrant.printGame(game_state);
     if (socketId == socket.id) {
       seenCaller = true;
     }
   });
 
   if (!seenCaller) {
-    let game_state = Object.assign({}, state, {team : teamFromClient(socket.id)});
+    let game_state = filterStateForTeam(state, TEAM_NONE);
     log('Sending state to client  ' + socket.id + " [Team None?]");
-    socket.emit('game-state', game_state );    
-    //szyfrant.printGame(game_state);
+    socket.emit('game-state', game_state );
   }
 }
 
