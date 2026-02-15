@@ -413,8 +413,6 @@ class App extends React.Component {
   return (<div class="game-wordsbar">{words}</div>);
   }
 
-  digits
-
   genBoardState() {
     let i = 0;
     let words = Array(8);
