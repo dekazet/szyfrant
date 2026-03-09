@@ -4,11 +4,14 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
 COPY . .
+ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN npm run build
 
 FROM node:18-alpine
 
 WORKDIR /app
+COPY --from=build /app/package.json /app/package-lock.json* ./
+RUN npm install --omit=dev
 COPY --from=build /app/src/server ./
 COPY --from=build /app/build ./build
 
